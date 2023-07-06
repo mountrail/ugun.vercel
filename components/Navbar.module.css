@@ -1,0 +1,40 @@
+.navLink {
+  font-size: 15px;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+  text-decoration: none;
+}
+
+.active {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+}
+
+.navLink:hover {
+  text-decoration: none;
+}
+.navLink:not(.active) {
+  transition: all 0.3s ease;
+}
+
+.navLink:not(.active):hover {
+  color: var(--secondary-color);
+}
+
+.navLink::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background-color: var(--primary-color);
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.navLink:not(.active):hover::before {
+  width: 100%;
+  background-color: var(--primary-color);
+}
