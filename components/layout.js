@@ -3,8 +3,9 @@ import Image from "next/image";
 import styles from "./layout.module.css";
 import utilStyles from "../styles/utils.module.css";
 import Link from "next/link";
+import Navbar from "./Navbar";
 
-const name = "Your Name";
+const name = "Ahmad Gunawan";
 export const siteTitle = "Next.js Sample Website";
 
 export default function Layout({ children, home }) {
@@ -26,6 +27,7 @@ export default function Layout({ children, home }) {
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <header className={styles.header}>
+        <Navbar />
         {home ? (
           <>
             <Image
@@ -36,7 +38,7 @@ export default function Layout({ children, home }) {
               width={144}
               alt=""
             />
-            <h1 className={utilStyles.heading2Xl}>{name}</h1>
+            <h1 className="uppercase">{name}</h1>
           </>
         ) : (
           <>
@@ -57,6 +59,7 @@ export default function Layout({ children, home }) {
             </h2>
           </>
         )}
+        <span></span>
       </header>
       <main>{children}</main>
       {!home && (
