@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import styles from "./Navbar.module.css";
-import { primaryColor, secondaryColor } from "./layout";
+import styles from "./TopNavbar.module.css";
+import { paddingX } from "./layout";
 
-const Navbar = () => {
+const TopNavbar = ({ height }) => {
   const router = useRouter();
   const menus = [
     { name: "Home", path: "/" },
@@ -11,10 +11,13 @@ const Navbar = () => {
     { name: "First Post", path: "/posts/first-post" },
   ];
   return (
-    <nav className="flex justify-between align-middle h-16 items-center">
+    <nav
+      className={`${styles.navbar} flex fixed bg-secondary justify-between align-middle items-center inset-x-0 top-0`}
+      style={{ height: height, paddingLeft: `${paddingX}`, paddingRight: `${paddingX}` }}
+    >
       <Link
         href={"/"}
-        className={`logo flex items-center text-${primaryColor} text-lg font-semibold h-full`}
+        className={`logo flex items-center text-primary text-lg font-semibold h-full`}
       >
         PORTFOLIO
       </Link>
@@ -26,7 +29,7 @@ const Navbar = () => {
                 href={menu.path}
                 className={`${styles.navLink} ${
                   router.pathname === menu.path ? styles.active : ""
-                } text-${primaryColor} px-4 h-full inline-block`}
+                } text-primary px-4 h-full inline-block`}
               >
                 {menu.name}
               </Link>
@@ -38,4 +41,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default TopNavbar;

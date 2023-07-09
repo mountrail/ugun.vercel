@@ -1,7 +1,4 @@
-.container {
-  /* max-width: 36rem; */
-  padding: 0 1rem;
-}
+
 
 .header {
   display: flex;
@@ -9,6 +6,12 @@
   align-items: center;
 }
 
+
+
 .backToHome {
   margin: 3rem 0 0;
+}
+
+.footer {
+  height: 60px;
 }

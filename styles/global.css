@@ -3,8 +3,9 @@
 @import "tailwindcss/utilities";
 
 :root {
-  --primary-color: #fafafa;
-  --secondary-color: #27272a;
+  --primary-color: #333;
+  --secondary-color: #fafafa;
+  --tertiary-color: #f6fbff;
 }
 
 html,
@@ -22,16 +23,30 @@ body {
   color: var(--primary-color);
 }
 
-a {
-  color: #0070f3;
-  text-decoration: none;
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-touch-callout: none;
 }
 
-a:hover {
+a {
   text-decoration: underline;
 }
 
 img {
   max-width: 100%;
   display: block;
+}
+
+.font-primary {
+  color: var(--primary-color);
+}
+
+.font-secondary {
+  color: var(--secondary-color);
+}
+
+.font-tertiary {
+  color: var(--tertiary-color);
 }
