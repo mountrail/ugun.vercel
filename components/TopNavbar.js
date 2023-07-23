@@ -1,19 +1,19 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styles from "./TopNavbar.module.css";
-import { paddingX } from "./layout";
+import { menus, navbarHeight } from "../pages/_app";
+import Footer from "./MainFooter";
+import SocialLinks from "./SocialLinks";
 
-const TopNavbar = ({ height }) => {
+const TopNavbar = () => {
   const router = useRouter();
-  const menus = [
-    { name: "Home", path: "/" },
-    { name: "About", path: "/about" },
-    { name: "First Post", path: "/posts/first-post" },
-  ];
+
   return (
     <nav
-      className={`${styles.navbar} flex fixed bg-secondary justify-between align-middle items-center inset-x-0 top-0`}
-      style={{ height: height, paddingLeft: `${paddingX}`, paddingRight: `${paddingX}` }}
+      className={`${styles.navbar} flex fixed bg-secondary justify-between align-middle items-center inset-x-0 top-0 px-sm md:px-md`}
+      style={{
+        height: navbarHeight,
+      }}
     >
       <Link
         href={"/"}
@@ -21,7 +21,7 @@ const TopNavbar = ({ height }) => {
       >
         PORTFOLIO
       </Link>
-      <ul className="flex">
+      <ul className={`hidden md:flex`}>
         {menus.map((menu) => {
           return (
             <li key={menu.name.toLowerCase()} className="leading-9">
@@ -37,6 +37,9 @@ const TopNavbar = ({ height }) => {
           );
         })}
       </ul>
+      <div className="flex md:hidden">
+        <SocialLinks />
+      </div>
     </nav>
   );
 };

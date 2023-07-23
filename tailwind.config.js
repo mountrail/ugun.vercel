@@ -16,8 +16,13 @@ module.exports = {
         primary: "#333",
         secondary: "#fafafa",
         tertiary: "#f6fbff",
+        quaternary: "#7d7789",
+      },
+      padding: {
+        sm: "20px",
+        md: "60px",
       },
     },
   },
-  plugins: [require('tailwind-scrollbar-hide')],
+  plugins: [require("tailwind-scrollbar-hide")],
 };

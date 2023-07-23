@@ -6,6 +6,7 @@
   --primary-color: #333;
   --secondary-color: #fafafa;
   --tertiary-color: #f6fbff;
+  --quaternary-color: #7d7789;
 }
 
 html,
@@ -15,12 +16,13 @@ body {
   font-family: Poppins;
   line-height: 1.6;
   font-size: 18px;
+  color: var(--primary-color);
   background-color: var(--secondary-color);
 }
 
 * {
   box-sizing: border-box;
-  color: var(--primary-color);
+  /* color: var(--primary-color); */
 }
 
 a,
