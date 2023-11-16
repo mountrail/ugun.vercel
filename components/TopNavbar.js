@@ -19,7 +19,7 @@ const TopNavbar = () => {
         href={"/"}
         className={`logo flex items-center text-primary text-lg font-semibold h-full`}
       >
-        PORTFOLIO
+        UGUN
       </Link>
       <ul className={`hidden md:flex`}>
         {menus.map((menu) => {
