@@ -36,7 +36,7 @@ export default function PageContact() {
           {contactBox(
             "address",
             faLocationDot,
-            "Jl. Indrasari I, Komplek Griya Anggrek 7 Pintu Air Ujung, Kec. Martapura, Kabupaten Banjar, Kalimantan Selatan 70619"
+            "Indonesia, South Kalimantan, Martapura City 70619"
           )}
           {contactBox("E-Mail", faEnvelope, "ahmadgunawan957@gmail.com")}
           {contactBox("Number", faPhone, "+62 81351994146")}
