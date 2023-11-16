@@ -12,7 +12,7 @@ import {
   faFacebook,
 } from "@fortawesome/free-brands-svg-icons";
 
-export const siteTitle = "Portfolio";
+export const siteTitle = "Ugun | Portfolio";
 export const fullName = "Ahmad Gunawan";
 export const menus = [
   { name: "Home", path: "/", icon: faHome },
