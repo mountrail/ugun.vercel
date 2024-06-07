@@ -39,7 +39,7 @@ export default function PageContact() {
             "Indonesia, South Kalimantan, Martapura City 70619"
           )}
           {contactBox("E-Mail", faEnvelope, "ahmadgunawan957@gmail.com")}
-          {contactBox("Number", faPhone, "+62 81351994146")}
+          {contactBox("Number", faPhone, "+62 89602774862")}
         </div>
       </section>
     </Layout>
