@@ -124,13 +124,13 @@ export default function PageAbout() {
           <div className="left lg:w-2/4">
             <div className="mb-5">{sectionTitle("programming")}</div>
             <ul>
-              <li>{percentageBar("HTML", 95)}</li>
-              <li>{percentageBar("CSS", 75)}</li>
+              <li>{percentageBar("HTML", 100)}</li>
+              <li>{percentageBar("CSS", 85)}</li>
               <li>{percentageBar("Javascript", 60)}</li>
-              <li>{percentageBar("Next.JS", 55)}</li>
-              <li>{percentageBar("Wordpress", 50)}</li>
-              <li>{percentageBar("PHP", 35)}</li>
-              <li>{percentageBar("Python", 30)}</li>
+              <li>{percentageBar("Next.JS", 60)}</li>
+              <li>{percentageBar("Wordpress", 70)}</li>
+              <li>{percentageBar("PHP", 50)}</li>
+              <li>{percentageBar("Python", 40)}</li>
               <li>{percentageBar("MySql", 40)}</li>
             </ul>
             <br />
@@ -138,8 +138,8 @@ export default function PageAbout() {
           <div className="right lg:w-2/5">
             <div className="mb-5">{sectionTitle("languages")}</div>
             <ul>
-              <li>{percentageBar("Indonesian", 95)}</li>
-              <li>{percentageBar("English", 70)}</li>
+              <li>{percentageBar("Indonesian", 100)}</li>
+              <li>{percentageBar("English", 80)}</li>
               <li>{percentageBar("German", 10)}</li>
             </ul>
           </div>
