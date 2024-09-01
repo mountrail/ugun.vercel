@@ -28,7 +28,7 @@ export default function PagePortfolio() {
       <Head>
         <title>{siteTitle}Portfolio</title>
       </Head>
-      <section className="py-8 px-3">
+      <section className="md:py-8 md:px-3">
       {sectionTitle("What i've made")}
         <div className="md:flex-row space-y-8 md:space-y-0 md:space-x-3 p-3 justify-center md:justify-start items-center md:items-stretch">
           {sectionData.map((section, index) => (
