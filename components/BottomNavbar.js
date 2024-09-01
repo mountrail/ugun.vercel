@@ -10,7 +10,7 @@ const BottomNavbar = () => {
   const router = useRouter();
   return (
     <nav
-      className={`flex flex-col md:hidden bg-secondary fixed inset-x-0 bottom-0 px-sm md:px-md`}
+      className={`flex flex-col md:hidden bg-secondary fixed inset-x-0 bottom-0 px-sm md:px-md z-50`}
       style={{
         height: navbarHeight,
       }}
