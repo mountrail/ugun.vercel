@@ -1,9 +1,26 @@
 import "../styles/global.css";
+
+// images
+const imagePath = "/public/images/";
+export const imageList = [
+  {
+    img: `${imagePath}anakmarketing.png`,
+    title: "Marketing Strategy",
+    description: "An effective marketing strategy for your business."
+  },
+  {
+    img: `${imagePath}demandgenlab.png`,
+    title: "Demand Generation",
+    description: "Boost your leads with demand generation tactics."
+  },
+  // Add more images as needed
+];
+
+// icons
 import {
   faHome,
   faUser,
-  faFolder,
-  faAddr,
+  faBriefcase,
   faAddressCard,
 } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -12,11 +29,12 @@ import {
   faFacebook,
 } from "@fortawesome/free-brands-svg-icons";
 
-export const siteTitle = "Ugun | Portfolio";
+export const siteTitle = "Ugun | ";
 export const fullName = "Ahmad Gunawan";
 export const menus = [
   { name: "Home", path: "/", icon: faHome },
   { name: "About", path: "/about", icon: faUser },
+  { name: "Portfolio", path: "/portfolio", icon: faBriefcase },
   { name: "Contact", path: "/contact", icon: faAddressCard },
   // { name: "First Post", path: "/posts/first-post", icon: faFolder },
 ];

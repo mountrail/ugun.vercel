@@ -27,7 +27,7 @@ export default function PageContact() {
   return (
     <Layout>
       <Head>
-        <title>{siteTitle}</title>
+        <title>{siteTitle}Contact</title>
       </Head>
 
       <section>

@@ -50,7 +50,7 @@ export default function PageAbout() {
   return (
     <Layout className="mb-8">
       <Head>
-        <title>{siteTitle}</title>
+        <title>{siteTitle}About</title>
       </Head>
       <section>
         {sectionTitle("About Me")}
