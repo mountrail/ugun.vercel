@@ -29,7 +29,7 @@ import {
   faFacebook,
 } from "@fortawesome/free-brands-svg-icons";
 
-export const siteTitle = "Ugun | ";
+export const siteTitle = "ugun | ";
 export const fullName = "Ahmad Gunawan";
 export const menus = [
   { name: "Home", path: "/", icon: faHome },

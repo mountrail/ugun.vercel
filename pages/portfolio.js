@@ -3,8 +3,8 @@ import { siteTitle, sectionTitle } from "./_app";
 import Head from "next/head";
 import Layout from "../components/layout";
 import Section1 from "../components/Section1";
-import imageAnakmarketing from "../public/images/anakmarketing.png"
-import imageDemandgenlab from "../public/images/demandgenlab.png"
+import imageAnakmarketing from "../public/images/anakmarketing.webp"
+import imageDemandgenlab from "../public/images/demandgenlab.webp"
 
 export default function PagePortfolio() {
   const sectionData = [

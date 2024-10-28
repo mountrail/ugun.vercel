@@ -29,7 +29,7 @@ const Section1 = ({ img, title, description, url }) => {
                             <p className="mt-4 mb-6 text-gray-600">
                                 {description}
                             </p>
-                            <ButtonPrimary message={"More..."} url={url} />
+                            <ButtonPrimary message={"More..."} url={url} newTab={true} />
 
                         </div>
                     </div>
