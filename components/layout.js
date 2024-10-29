@@ -6,7 +6,7 @@ import { siteTitle, navbarHeight, footerHeight } from "../pages/_app";
 
 export default function Layout({ children, home }) {
   return (
-    <div className={`flex flex-col`}>
+    <div className={`flex flex-col `}>
       <Head>
         {/* Standard favicon */}
         <link rel="icon" href="/favicon/favicon.ico" />
@@ -39,7 +39,7 @@ export default function Layout({ children, home }) {
       </Head>
       <TopNavbar />
       <main
-        className={`flex flex-col absolute bg-tertiary scrollbar-hide overflow-hidden w-full px-sm md:px-md`}
+        className={`flex flex-col bg-tertiary scrollbar-hide overflow-hidden px-sm md:px-md text-sm sm:text-sm md:text-lg lg:text-xl`}
         style={{
           height: `calc(100vh - (${navbarHeight} + ${footerHeight} ))`,
           marginTop: `${navbarHeight}`,
