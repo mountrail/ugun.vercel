@@ -12,7 +12,7 @@ const Section1 = ({ img, title, description, url }) => {
                             <Image
                                 alt={title}
                                 src={img}
-                                className="absolute inset-0 h-full w-full object-cover" />
+                                className="absolute inset-0 h-full w-full object-cover object-top" />
                         </div>
                     </div>
 
