@@ -8,7 +8,7 @@ const Section1 = ({ img, title, description, url }) => {
             <div className="mx-auto max-w-screen-2xl md:px-4 md:py-16 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1  lg:grid-cols-2">
                     <div className="relative z-10 lg:py-16">
-                        <div className="relative h-64 sm:h-80 lg:h-100">
+                        <div className="relative h-64 sm:h-80 lg:h-100 bg-quaternary">
                             <Image
                                 alt={title}
                                 src={img}
