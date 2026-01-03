@@ -22,7 +22,7 @@ export default function Home() {
           <span className="font-bold">
             <TypewriterComponent
               options={{
-                strings: ["a Programmer", "a Freelancer", "an Editor"],
+                strings: ["a Programmer", "an Editor", "a Police Officer"],
                 autoStart: true,
                 loop: true,
               }}

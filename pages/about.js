@@ -57,32 +57,35 @@ export default function PageAbout() {
         <div className="flex wrap pt-5 lg:flex-row flex-col text-quaternary justify-between">
           <div className="left lg:w-2/4">
             <p>
-              My name is <span className="font-bold">Ahmad Gunawan</span>, and I
-              am a passionate and dedicated programmer. I have a strong interest
-              in web development, and it is my primary focus. However, I also
-              enjoy exploring new avenues, such as creating apps and games. I
-              find joy in the process of bringing ideas to life through coding
-              and leveraging my creativity.
+              I'm <span className="font-bold">Ahmad Gunawan</span>, a full-stack
+              web developer with hands-on experience building production web
+              applications with Next.js, WordPress/PHP sites, and frontend
+              interfaces. I worked as a Junior Fullstack Web Developer at
+              Demand Gen Lab (Jun 2022–Jun 2023 and Dec 2023–Jul 2025) and as
+              an online programming tutor at Kodland PTE. LTD (Aug 2023–May
+              2024). I enjoy creating web apps, mobile apps, and games—turning
+              ideas into working products is what motivates me.
             </p>
             <br />
             <p>
-              Aside from programming, I have skills in graphic design,
-              specifically in Photoshop. I love utilizing my design skills to
-              create visually appealing and engaging content. Additionally, I am
-              proficient in using Excel, harnessing its power to analyze and
-              organize data effectively.
+              I also work on visual design (Adobe Photoshop), photo/video
+              editing, and data tasks using Excel. Combining design and
+              engineering helps me deliver polished, user-focused experiences
+              from concept to launch.
             </p>
             <br />
           </div>
           <div className="right lg:w-2/5 mb-5">
             <p>
-              With a combination of technical expertise and a continuous desire
-              to learn, I am committed to delivering high-quality solutions and
-              improving my skills as a developer. I thrive in collaborative
-              environments and enjoy working with others to bring innovative
-              ideas to fruition. Programming is not just a profession for me; it
-              is a passion that drives me to constantly push my boundaries and
-              create meaningful experiences through technology.
+              I am committed to continuous learning, collaboration, and
+              delivering practical, maintainable solutions. Since July 2025 I
+              have been a member of the Mobile Brigade Corps, serving in
+              national defense and community service roles. That experience
+              has strengthened my leadership, teamwork, and problem-solving
+              skills under pressure. I have also mentored
+              students and competed in provincial web competitions (2nd
+              place). My focus is on shipping reliable features, writing
+              clear code, and solving real user problems.
             </p>
           </div>
         </div>
@@ -159,7 +162,12 @@ export default function PageAbout() {
               {
                 name: "STMIK Banjarbaru",
                 detail: "IT major",
-                time: "2023 - on going",
+                time: "2023 - 2024",
+              },
+              {
+                name: "Sekolah Polisi Negara Polda Kalimantan Selatan",
+                detail: "Pendidikan Pembentukan Tamtama",
+                time: "Jul 2025 - Dec 2025",
               },
             ])}
             <br />
@@ -170,12 +178,27 @@ export default function PageAbout() {
               {
                 name: "High School Province level Web Technology Competition 2021",
                 detail: "won 2nd Place",
-                time: "2021",
+                time: "Aug 2021",
               },
               {
                 name: "Demand Gen Lab",
                 detail: "Work as Junior Fullstack Web Developer",
-                time: "2022 - 2023",
+                time: "Jun 2022 - Jun 2023",
+              },
+              {
+                name: "Kodland PTE. LTD",
+                detail: "Online tutor for kids in basic programming",
+                time: "Aug 2023 - May 2024",
+              },
+              {
+                name: "Demand Gen Lab",
+                detail: "Work as Junior Fullstack Web Developer",
+                time: "Dec 2023 - Jul 2025",
+              },
+              {
+                name: "Mobile Brigade Corps",
+                detail: "Active member in the organization",
+                time: "Dec 2025 - on going",
               },
             ])}
           </div>
