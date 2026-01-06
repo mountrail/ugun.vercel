@@ -57,7 +57,7 @@ export default function PageAbout() {
         <div className="flex wrap pt-5 lg:flex-row flex-col text-quaternary justify-between">
           <div className="left lg:w-2/4">
             <p>
-              I'm <span className="font-bold">Ahmad Gunawan</span>, a full-stack
+              {"I'm"} <span className="font-bold">Ahmad Gunawan</span>, a full-stack
               web developer with hands-on experience building production web
               applications with Next.js, WordPress/PHP sites, and frontend
               interfaces. I worked as a Junior Fullstack Web Developer at
