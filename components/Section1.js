@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ButtonPrimary from "./ButtonPrimary";
 
-const Section1 = ({ img, title, description, url }) => {
+const Section1 = ({ img, title, description, url, buttonLabel = "More..." }) => {
     return (
         <section>
             <div className="mx-auto max-w-screen-2xl md:px-4 md:py-16 sm:px-6 lg:px-8">
@@ -29,7 +29,7 @@ const Section1 = ({ img, title, description, url }) => {
                             <p className="mt-4 mb-6 text-gray-600">
                                 {description}
                             </p>
-                            <ButtonPrimary message={"More..."} url={url} newTab={true} />
+                            <ButtonPrimary message={buttonLabel} url={url} newTab={true} />
 
                         </div>
                     </div>

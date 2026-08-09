@@ -6,6 +6,7 @@ import Section1 from "../components/Section1";
 import imageAnakmarketing from "../public/images/anakmarketing.webp"
 import imageDemandgenlab from "../public/images/demandgenlab.webp"
 import imageBrimob from "../public/images/brimob.webp"
+import imageScoreboard from "../public/images/scoreboard.webp"
 
 export default function PagePortfolio() {
   const sectionData = [
@@ -27,6 +28,13 @@ export default function PagePortfolio() {
       description: "Member of Indonesian National Police Mobile Brigade Corps.",
       url: "https://instagram.com/itgun"
     },
+    {
+      img: imageScoreboard,
+      title: "Volleyball Scoreboard",
+      description: "Interactive live scoreboard for volleyball matches.",
+      url: "/apps/scoreboard/scoreboard.html",
+      buttonLabel: "View",
+    },
     // Add more sections as needed
   ];
 
@@ -45,6 +53,7 @@ export default function PagePortfolio() {
               title={section.title}
               description={section.description}
               url={section.url}
+              buttonLabel={section.buttonLabel}
             />
           ))}
         </div>
