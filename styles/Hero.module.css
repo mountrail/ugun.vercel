@@ -1,0 +1,159 @@
+@media (prefers-reduced-motion: no-preference) {
+    .grid {
+        animation: drift 6s linear infinite;
+    }
+}
+
+@keyframes drift {
+    from {
+        background-position: 0 0, 0 0;
+    }
+
+    to {
+        background-position: 40px 40px, 40px 40px;
+    }
+}
+
+.tickerWrap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8%;
+    height: 20px;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+}
+
+.tickerTrack {
+    display: flex;
+    width: max-content;
+    white-space: nowrap;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.22;
+}
+
+.tickerTrack span {
+    padding-right: 48px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .tickerTrack {
+        animation: scroll 28s linear infinite;
+    }
+}
+
+@keyframes scroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.hero {
+    position: relative;
+    z-index: 0;
+    /* creates a stacking context so children with z-index: -1 stack inside .hero, not behind the page background */
+    --accent: var(--accent-dev);
+}
+
+.hero[data-mode="field"] {
+    --accent: var(--accent-field);
+}
+
+.grid {
+    position: absolute;
+    inset: -40px;
+    background-image:
+        linear-gradient(var(--quaternary-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--quaternary-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 5px 10px;
+    margin-bottom: 20px;
+    width: max-content;
+    transition: color 0.4s ease, border-color 0.4s ease;
+}
+
+.dot {
+    position: relative;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: background 0.4s ease;
+}
+
+.dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .dot::after {
+        animation: pulse 1.8s ease-out infinite;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(2.6);
+        opacity: 0;
+    }
+}
+
+.cursor {
+    display: inline-block;
+    margin-left: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .cursor {
+        animation: blink 1s step-end infinite;
+    }
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.detail {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--quaternary-color);
+    margin-bottom: 4px;
+}
