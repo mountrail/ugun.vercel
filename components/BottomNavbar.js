@@ -21,22 +21,17 @@ const BottomNavbar = () => {
             <li key={menu.name.toLowerCase()} className=" flex-1  h-full">
               <Link
                 href={menu.path}
-                className={`${
-                  router.pathname === menu.path ? styles.active : ""
-                } flex flex-col text-primary px-1 no-underline h-full justify-center hover:border-2`}
+                className={`navItem ${router.pathname === menu.path ? styles.active : ""} flex flex-col text-primary px-1 no-underline h-full justify-center hover:border-2`}
               >
                 <div className={`flex justify-center`}>
                   <FontAwesomeIcon
-                    className={`w-5 max-h-5 ${
-                      router.pathname === menu.path ? "text-secondary" : ""
-                    }`}
+                    className={`w-5 max-h-5 ${router.pathname === menu.path ? "text-secondary" : ""
+                      }`}
                     icon={menu.icon}
                   />
                 </div>
                 <div
-                  className={`${
-                    router.pathname === menu.path ? styles.active : ""
-                  } flex text-xs justify-center`}
+                  className={`navItem ${router.pathname === menu.path ? styles.active : ""} flex text-xs justify-center`}
                   style={{ fontSize: "8px" }}
                 >
                   {menu.name}

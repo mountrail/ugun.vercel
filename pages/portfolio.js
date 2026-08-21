@@ -7,6 +7,7 @@ import imageAnakmarketing from "../public/images/anakmarketing.webp"
 import imageDemandgenlab from "../public/images/demandgenlab.webp"
 import imageBrimob from "../public/images/brimob.webp"
 import imageScoreboard from "../public/images/scoreboard.webp"
+import AnimatedSection from "../components/AnimatedSection";
 
 export default function PagePortfolio() {
   const sectionData = [
@@ -43,21 +44,25 @@ export default function PagePortfolio() {
       <Head>
         <title>{siteTitle}Portfolio</title>
       </Head>
+
       <section className="md:py-8 md:px-3">
         {sectionTitle("What i've made")}
         <div className="md:flex-row space-y-8 md:space-y-0 md:space-x-3 p-3 mb-20 justify-center md:justify-start items-center md:items-stretch">
           {sectionData.map((section, index) => (
-            <Section1
-              key={index}
-              img={section.img}
-              title={section.title}
-              description={section.description}
-              url={section.url}
-              buttonLabel={section.buttonLabel}
-            />
+            <AnimatedSection>
+              <Section1
+                key={index}
+                img={section.img}
+                title={section.title}
+                description={section.description}
+                url={section.url}
+                buttonLabel={section.buttonLabel}
+              />
+            </AnimatedSection>
+
           ))}
         </div>
       </section>
-    </Layout>
+    </Layout >
   );
 }

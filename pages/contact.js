@@ -9,6 +9,7 @@ import {
   faEnvelope,
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
+import AnimatedSection from "../components/AnimatedSection";
 
 const contactBox = (name, icon, info) => {
   return (
@@ -30,6 +31,7 @@ export default function PageContact() {
         <title>{siteTitle}Contact</title>
       </Head>
 
+      <AnimatedSection>
       <section>
         {sectionTitle("get in touch")}
         <div className="flex flex-col lg:flex-row my-12">
@@ -42,6 +44,7 @@ export default function PageContact() {
           {contactBox("Number", faPhone, "+62 89602774862")}
         </div>
       </section>
+      </AnimatedSection>
     </Layout>
   );
 }

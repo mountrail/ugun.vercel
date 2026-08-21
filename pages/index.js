@@ -4,6 +4,7 @@ import { fullName, siteTitle } from "./_app";
 import utilStyles from "../styles/utils.module.css";
 import ButtonPrimary from "../components/ButtonPrimary";
 import TypewriterComponent from "typewriter-effect";
+import AnimatedSection from "../components/AnimatedSection";
 
 export default function Home() {
   return (
@@ -11,7 +12,8 @@ export default function Home() {
       <Head>
         <title>{siteTitle}Home</title>
       </Head>
-      <section>
+      <AnimatedSection>
+        <section>
         <div>{/* image */}</div>
         <h3 className="mb-6 uppercase text-4xl md:text-5xl font-bold ">
           <span>{fullName}</span>
@@ -22,7 +24,7 @@ export default function Home() {
           <span className="font-bold">
             <TypewriterComponent
               options={{
-                strings: ["a Programmer", "an Editor", "a Police Officer"],
+                strings: ["a Programmer", "an Editor", "a Police"],
                 autoStart: true,
                 loop: true,
               }}
@@ -30,7 +32,8 @@ export default function Home() {
           </span>
         </div>
         <ButtonPrimary message={"More About Me..."} url={"/about"} />
-      </section>
+        </section>
+      </AnimatedSection>
     </Layout>
   );
 }

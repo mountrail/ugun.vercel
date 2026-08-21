@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import ButtonPrimary from "./ButtonPrimary";
+import AnimatedSection from "./AnimatedSection";
 
 const Section1 = ({ img, title, description, url, buttonLabel = "More..." }) => {
     return (
+        <AnimatedSection>
         <section>
             <div className="mx-auto max-w-screen-2xl md:px-4 md:py-16 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1  lg:grid-cols-2">
@@ -35,7 +37,8 @@ const Section1 = ({ img, title, description, url, buttonLabel = "More..." }) => 
                     </div>
                 </div>
             </div>
-        </section>)
+        </section>
+        </AnimatedSection>)
 }
 
 export default Section1;
