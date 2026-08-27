@@ -2,1462 +2,1418 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Papan Skor Voli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#1c1c1c;
-    --panel:#7d7d7d;
-    --panel-flash:#9a9a9a;
-    --score:#f5e40a;
-    --text:#ffffff;
-    --badge:#e8e8e8;
-    --badge-text:#1c1c1c;
-    --btn:#333333;
-    --btn-text:#ffffff;
-    --btn-hover:#464646;
-    --menu-bg:#2a2a2a;
-    --menu-hover:#3d3d3d;
-    --menu-border:#4a4a4a;
-    --name-size:64px;
-    --score-size:260px;
-    --bolt:#fff59d;
-    --panel-alpha:1;
-  }
-  [data-theme="light"]{
-    --bg:#eef0f2; --panel:#ffffff; --panel-flash:#fff7cf; --score:#e0a800; --text:#1c1c1c;
-    --badge:#1c1c1c; --badge-text:#ffffff; --btn:#dcdcdc; --btn-text:#1c1c1c; --btn-hover:#c9c9c9;
-    --menu-bg:#ffffff; --menu-hover:#f0f0f0; --menu-border:#ddd;
-  }
-  [data-theme="navy"]{
-    --bg:#0b1626; --panel:#1c3a5e; --panel-flash:#2c5a8e; --score:#ffd23f; --text:#eaf2ff;
-    --badge:#eaf2ff; --badge-text:#0b1626; --btn:#16283f; --btn-text:#eaf2ff; --btn-hover:#20395a;
-    --menu-bg:#16283f; --menu-hover:#20395a; --menu-border:#2c4a70;
-  }
-  [data-theme="maroon"]{
-    --bg:#1f0a0d; --panel:#5e1c26; --panel-flash:#8e2c38; --score:#ffd23f; --text:#fbeaec;
-    --badge:#fbeaec; --badge-text:#1f0a0d; --btn:#3a1216; --btn-text:#fbeaec; --btn-hover:#4a181d;
-    --menu-bg:#3a1216; --menu-hover:#4a181d; --menu-border:#6b2530;
+    --red:#d81f2a;
+    --maroon:#7a0f16;
+    --navy:#0e1a34;
+    --grey-bg:#e7e9ea;
+    --dot:rgba(150,150,150,.35);
+    --score-font: fantasy, 'Black Ops One', 'Arial Narrow', sans-serif;
+    --score-scale:1;
+    --score-color:#fff;
+    --score-stroke:#d81f2a;
+    --crest-scale:1;
   }
   *{ box-sizing:border-box; }
-  html,body{ height:100%; }
+  html,body{ height:100%; margin:0; }
   body{
-    margin:0;
     font-family:'Segoe UI', Arial, sans-serif;
-    background-color:var(--bg);
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
-    color:var(--text);
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-    transition:background-color .3s;
-  }
-  .board{ flex:1; display:flex; gap:16px; padding:16px; min-height:0; }
-  .team{
-    flex:1;
-    border-radius:14px;
-    position:relative;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding:14px 10px;
-    cursor:pointer;
+    height:100vh; width:100vw; overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
     user-select:none;
-    transition:transform .08s;
+  }
+
+  .stage{
+    position:relative; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg,#f4f5f6 0%,var(--grey-bg) 55%,#f4f5f6 100%);
     overflow:hidden;
   }
-  .team::before{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:var(--panel);
-    opacity:var(--panel-alpha);
-    border-radius:14px;
-    z-index:-1;
-    transition:background .12s;
-  }
-  .team.flashing::before{ background:var(--panel-flash); }
-  .team:active{ transform:scale(0.99); }
-  .team-name{
-    width:100%; text-align:center; font-size:var(--name-size); font-weight:800;
-    letter-spacing:1px; text-transform:uppercase; outline:none; background:transparent;
-    border:none; color:inherit; cursor:text; overflow-wrap:break-word; margin-bottom:2px;
-  }
-  .badges-row{ position:absolute; top:50%; transform:translateY(-50%); z-index:6; margin:0; }
-  .badges-row.hidden{ display:none; }
-  #teamA .badges-row{ right:10px; }
-  #teamB .badges-row{ left:10px; }
-  .score-wrap{ position:relative; display:flex; align-items:center; justify-content:center; }
-  .score{ font-size:var(--score-size); font-weight:800; color:var(--score); line-height:0.95; font-variant-numeric:tabular-nums; position:relative; z-index:1; }
 
-  /* ===== Animasi Petir ===== */
-  .lightning-wrap{ position:absolute; inset:0; pointer-events:none; z-index:5; overflow:visible; --intensity-scale:1; }
-  .lightning-wrap svg{ width:100%; height:100%; display:block; transform:scale(var(--intensity-scale)); transform-origin:50% 40%; }
-  .bolt-glow, .bolt-core, .branch-glow, .branch-core{
-    fill:none; stroke:var(--bolt); stroke-linecap:round; stroke-linejoin:round; opacity:0;
-    stroke-dasharray:1; stroke-dashoffset:1;
-  }
-  .bolt-glow{ stroke-width:9; filter:blur(6px); }
-  .bolt-core{ stroke-width:2.6; stroke:#ffffff; filter:drop-shadow(0 0 6px var(--bolt)); }
-  .branch-glow{ stroke-width:5; filter:blur(4px); }
-  .branch-core{ stroke-width:1.6; stroke:#ffffff; }
-  .lightning-wrap.strike .bolt-glow, .lightning-wrap.strike .bolt-core{
-    animation:boltDraw .28s cubic-bezier(.2,.9,.3,1) forwards, boltFade .55s ease-in .18s forwards;
-  }
-  .lightning-wrap.strike .branch-glow, .lightning-wrap.strike .branch-core{
-    animation:boltDraw .18s cubic-bezier(.2,.9,.3,1) .12s forwards, boltFade .4s ease-in .26s forwards;
-  }
-  @keyframes boltDraw{ 0%{ stroke-dashoffset:1; opacity:1; } 100%{ stroke-dashoffset:0; opacity:1; } }
-  @keyframes boltFade{ 0%{ opacity:1; } 100%{ opacity:0; } }
-  .flash-overlay{ position:absolute; inset:0; background:var(--flash-color,#ffffff); opacity:0; pointer-events:none; z-index:4; border-radius:14px; }
-  .flash-overlay.flash{ animation:blindFlash .5s ease-out; }
-  @keyframes blindFlash{ 0%{opacity:0;} 10%{opacity:.98;} 28%{opacity:.35;} 45%{opacity:.7;} 100%{opacity:0;} }
-  .team.edge-flash{ animation:edgeGlowPulse 1.1s ease-out; }
-  @keyframes edgeGlowPulse{ 0%{box-shadow:inset 0 0 0 0 var(--edge-glow-color,#fff);} 14%{box-shadow:inset 0 0 46px 6px var(--edge-glow-color,#fff);} 100%{box-shadow:inset 0 0 0 0 transparent;} }
-  .ember{ fill:var(--bolt); opacity:0; }
-  .lightning-wrap.aftermath .ember{ animation:emberFall .95s ease-out forwards; }
-  .ember-1{ animation-delay:.28s; } .ember-2{ animation-delay:.34s; } .ember-3{ animation-delay:.4s; }
-  .ember-4{ animation-delay:.46s; } .ember-5{ animation-delay:.52s; } .ember-6{ animation-delay:.58s; }
-  .ember-7{ animation-delay:.64s; } .ember-8{ animation-delay:.7s; }
-  @keyframes emberFall{ 0%{opacity:0; transform:translateY(0) scale(1);} 15%{opacity:1;} 100%{opacity:0; transform:translateY(28px) scale(.25);} }
-  .team.aftermath{ animation:afterglowPulse 1.2s ease-out; }
-  @keyframes afterglowPulse{ 0%{box-shadow:inset 0 0 0 0 var(--bolt);} 14%{box-shadow:inset 0 0 48px 6px var(--bolt);} 100%{box-shadow:inset 0 0 0 0 transparent;} }
+  .bg-dots{ position:absolute; inset:0;
+    background-image:radial-gradient(circle, var(--dot) 1.6px, transparent 1.8px);
+    background-size:16px 16px; opacity:.55; pointer-events:none; }
+  .corner{ position:absolute; pointer-events:none; }
+  .corner-tl{ top:-8%; left:-10%; width:46%; height:34%; background:linear-gradient(135deg,var(--maroon),var(--red)); clip-path:polygon(0 0, 100% 0, 0 100%); }
+  .corner-tr{ top:-10%; right:-12%; width:40%; height:20%; background:linear-gradient(225deg,var(--maroon),var(--red)); clip-path:polygon(100% 0, 100% 100%, 0 0); }
+  .corner-bl{ bottom:-10%; left:-12%; width:42%; height:26%; background:linear-gradient(45deg,var(--maroon),var(--red)); clip-path:polygon(0 100%, 100% 100%, 0 0); }
+  .corner-br{ bottom:-9%; right:-11%; width:48%; height:36%; background:linear-gradient(315deg,var(--maroon),var(--red)); clip-path:polygon(100% 100%, 0 100%, 100% 0); }
+  .edge-bar{ position:absolute; top:0; bottom:0; width:14px; background:var(--red); pointer-events:none; }
+  .edge-left{ left:0; } .edge-right{ right:0; }
 
-  /* ===== Animasi Cinta ===== */
-  .hearts-wrap{ position:absolute; inset:-60px -30px; pointer-events:none; z-index:5; overflow:visible; --intensity-scale:1; transform:scale(var(--intensity-scale)); transform-origin:50% 50%; }
-  .heart-particle{ position:absolute; font-size:clamp(20px,4.6vw,38px); opacity:0; filter:drop-shadow(0 2px 5px rgba(0,0,0,.3)); }
-  .hearts-wrap.blow .heart-particle[data-level]{ display:none; }
-  .hearts-wrap.blow .heart-particle{ }
-  @keyframes heartFloatL{ 0%{opacity:0; transform:translate(0,0) scale(.4) rotate(0);} 14%{opacity:1; transform:translate(0,-8%) scale(1) rotate(-4deg);} 100%{opacity:0; transform:translate(-34px,-190%) scale(1.15) rotate(-16deg);} }
-  @keyframes heartFloatR{ 0%{opacity:0; transform:translate(0,0) scale(.4) rotate(0);} 14%{opacity:1; transform:translate(0,-8%) scale(1) rotate(4deg);} 100%{opacity:0; transform:translate(34px,-190%) scale(1.15) rotate(16deg);} }
-  @keyframes heartFloatC{ 0%{opacity:0; transform:translate(0,0) scale(.4) rotate(0);} 14%{opacity:1; transform:translate(0,-8%) scale(1) rotate(0);} 100%{opacity:0; transform:translate(0,-200%) scale(1.2) rotate(0);} }
-
-  /* ===== Animasi Polkadot (pelangi) ===== */
-  .ink-wrap{ position:absolute; inset:-60px -30px; pointer-events:none; z-index:5; overflow:visible; --intensity-scale:1; transform:scale(var(--intensity-scale)); transform-origin:50% 50%; }
-  .ink-dot{ position:absolute; width:14px; height:14px; border-radius:50%; opacity:0; box-shadow:0 2px 6px rgba(0,0,0,.25); }
-  @keyframes inkDotPop{
-    0%{ opacity:0; transform:scale(.2); }
-    22%{ opacity:1; transform:scale(1.15); }
-    45%{ opacity:1; transform:scale(.9); }
-    100%{ opacity:0; transform:scale(1); }
+  .content{
+    position:relative; z-index:2;
+    width:100%; height:100%;
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:clamp(10px,2vh,26px) clamp(14px,3vw,46px);
+    gap:clamp(6px,1.4vh,16px);
   }
 
-  .badge{
-    background:var(--badge); color:var(--badge-text); padding:6px 8px; border-radius:10px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    box-shadow:0 2px 6px rgba(0,0,0,.25); line-height:1.1; gap:2px;
+  /* Sponsors — single shared white background, logos have no background of their own */
+  .sponsors{
+    display:flex; align-items:center; justify-content:center; gap:clamp(10px,2vw,26px);
+    flex-wrap:wrap; align-self:center; max-width:100%;
+    background:rgba(255,255,255,.92); border-radius:14px; padding:10px 26px;
+    box-shadow:0 4px 14px rgba(0,0,0,.1);
   }
-  .badge .badge-label{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; opacity:.7; }
-  .badge .badge-row{ display:flex; align-items:center; gap:8px; }
-  .badge .badge-val{ font-size:20px; font-weight:700; min-width:20px; text-align:center; }
-  .badge .badge-btn{
-    width:26px; height:26px; border-radius:6px; border:none; background:rgba(0,0,0,.15); color:inherit;
-    font-size:16px; font-weight:800; line-height:1; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; padding:0;
-  }
-  .badge .badge-btn:hover{ background:rgba(0,0,0,.28); }
+  .sponsors:empty{ display:none; padding:0; }
+  .sponsor-logo{ position:relative; max-height:clamp(38px,6.5vh,72px); max-width:clamp(80px,14vw,170px);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .sponsor-logo img{ max-height:clamp(34px,6vh,66px); max-width:clamp(72px,13vw,160px); width:auto; height:auto; object-fit:contain; display:block; }
+  .sponsor-remove{ position:absolute; top:-8px; right:-8px; width:20px; height:20px; border-radius:50%;
+    background:var(--red); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center;
+    justify-content:center; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,.3); }
+  .sponsor-add{ height:clamp(38px,6.5vh,72px); width:clamp(38px,6.5vh,72px); border:2px dashed #b8b8b8; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; font-size:24px; color:#999; cursor:pointer; }
+  .sponsors.clean .sponsor-add{ display:none; }
+  .sponsors.clean .sponsor-remove{ display:none; }
 
-  .controls{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px; padding:12px 14px; position:relative; }
-  .controls button{
-    background:var(--btn); color:var(--btn-text); border:none; border-radius:8px; padding:10px 18px;
-    font-size:15px; font-weight:600; cursor:pointer; transition:background .15s;
-  }
-  .controls button:hover{ background:var(--btn-hover); }
-  .theme-wrap{ position:relative; }
-  .theme-menu{
-    display:none; position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
-    background:var(--menu-bg); border:1px solid var(--menu-border); border-radius:10px; overflow:hidden;
-    min-width:180px; box-shadow:0 6px 18px rgba(0,0,0,.35); z-index:20;
-  }
-  .theme-menu.open{ display:block; }
-  .theme-menu button{
-    display:block; width:100%; text-align:left; background:transparent; border:none; border-radius:0;
-    color:var(--text); padding:10px 16px; font-size:14px; font-weight:500; cursor:pointer;
-  }
-  .theme-menu button:hover{ background:var(--menu-hover); }
-  .theme-menu button.active{ font-weight:800; }
-  .theme-menu.panel-menu{ padding:14px 16px; min-width:250px; cursor:default; }
-  .field-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; font-size:13px; }
-  .field-row:last-child{ margin-bottom:0; }
-  .field-row input[type=color]{ width:38px; height:28px; border:none; border-radius:6px; padding:0; background:none; cursor:pointer; }
-  .field-row input[type=range]{ width:110px; accent-color:var(--score); }
-  .field-row input[type=number]{ width:70px; padding:5px 6px; border-radius:6px; border:1px solid var(--menu-border); background:var(--bg); color:var(--text); }
-  .field-row input[type=checkbox]{ width:16px; height:16px; }
-  .field-row label{ opacity:.9; }
-  .mini-btn{
-    background:var(--btn); color:var(--btn-text); border:none; border-radius:6px; padding:6px 10px;
-    font-size:12px; font-weight:600; cursor:pointer;
-  }
-  .mini-btn:hover{ background:var(--btn-hover); }
-  .slot-list{ max-height:160px; overflow-y:auto; margin-top:8px; }
-  .slot-item{ display:flex; align-items:center; justify-content:space-between; gap:6px; padding:6px 0; font-size:12px; border-bottom:1px solid var(--menu-border); }
-  .slot-item:last-child{ border-bottom:none; }
-  .slot-actions{ display:flex; gap:4px; }
+  /* Team header */
+  .team-header{ display:flex; align-items:center; width:100%; min-width:0; }
+  .banner{ flex:1; min-width:0; height:clamp(46px,7vh,70px);
+    background:linear-gradient(90deg, var(--navy) 60%, #4a5a8a 100%);
+    display:flex; align-items:center; position:relative; overflow:hidden; }
+  .banner-a{ justify-content:flex-start; padding-left:16px; margin-right:-14px; clip-path:polygon(0 0,100% 0,94% 100%,0% 100%); }
+  .banner-b{ background:linear-gradient(270deg, var(--navy) 60%, #4a5a8a 100%); justify-content:flex-end; padding-right:16px; margin-left:-14px; clip-path:polygon(6% 0,100% 0,100% 100%,0 100%); }
+  .team-name{ display:block; color:#fff; font-weight:800; letter-spacing:.5px; text-transform:uppercase;
+    font-size:clamp(14px,2.6vw,28px); outline:none; cursor:text; white-space:nowrap; max-width:100%;
+    min-height:clamp(14px,2.6vw,28px); min-width:10px; }
+  .team-name:empty::before{ content:attr(data-placeholder); opacity:.45; text-transform:none; font-weight:600; }
+  .crest{ width:clamp(56px,8.5vw,88px); height:clamp(56px,8.5vw,88px); background:transparent; border:none;
+    display:flex; align-items:center; justify-content:center; z-index:3;
+    font-size:clamp(22px,3vw,34px); cursor:pointer; flex-shrink:0; overflow:hidden;
+    text-shadow:0 1px 4px rgba(0,0,0,.35); transform:scale(var(--crest-scale,1)); transform-origin:center center; }
+  .crest img{ width:100%; height:100%; object-fit:contain; }
+  .crest-a{ margin-right:-6px; } .crest-b{ margin-left:-6px; }
+  .center-score{ background:#111; color:#fff; font-weight:400; letter-spacing:1px; font-family:var(--score-font);
+    font-size:clamp(20px,3.6vw,38px); padding:6px 10px; width:clamp(120px,15vw,175px); text-align:center; z-index:2;
+    cursor:pointer; flex-shrink:0; font-variant-numeric:tabular-nums; margin:0 clamp(10px,2vw,22px); }
 
-  .size-controls{ display:flex; align-items:center; gap:14px; padding:0 14px 10px; justify-content:center; flex-wrap:wrap; }
-  .size-item{ display:flex; align-items:center; gap:6px; font-size:12px; opacity:.85; }
-  .size-item input[type=range]{ width:110px; accent-color:var(--score); }
-  .status{ text-align:center; font-size:12px; opacity:.5; padding-bottom:6px; height:14px; }
+  .mid-row{ flex:1; display:flex; align-items:center; justify-content:space-evenly; min-height:0; }
+  /* score-scale transform lives on the WRAP so the floating minus button scales together with the number */
+  .side-score-wrap{ position:relative; width:clamp(70px,12vw,150px); text-align:center; flex-shrink:0; cursor:pointer; overflow:visible;
+    transform:scale(var(--score-scale)); transform-origin:center center; }
+  .side-score{ display:inline-block; font-family:var(--score-font); font-size:clamp(60px,13vw,150px); line-height:1; color:var(--score-color);
+    -webkit-text-stroke:clamp(4px,1.1vw,1px) var(--score-stroke); text-shadow:0 10px 16px rgba(0,0,0,.35); }
+  .score-dot{ width:14px; height:14px; border-radius:50%; background:var(--red); margin:2px auto 0;
+    box-shadow:0 2px 6px rgba(0,0,0,.35); opacity:0; transform:scale(.5); transition:opacity .2s, transform .2s; }
+  .side-score-wrap.scored .score-dot{ opacity:1; transform:scale(1); }
 
-  .modal-overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:100; align-items:center; justify-content:center; padding:20px; }
-  .modal-overlay.open{ display:flex; }
-  .modal-box{
-    background:var(--menu-bg); color:var(--text); border:1px solid var(--menu-border); border-radius:14px;
-    max-width:520px; width:100%; max-height:82vh; overflow-y:auto; padding:22px 24px; box-shadow:0 12px 32px rgba(0,0,0,.4);
-  }
-  .modal-box h2{ margin-top:0; font-size:20px; }
-  .modal-box h3{ font-size:14px; margin:18px 0 8px; opacity:.8; text-transform:uppercase; letter-spacing:.5px; }
-  .modal-box ul{ margin:0; padding-left:18px; font-size:14px; line-height:1.7; }
-  .modal-box table{ width:100%; border-collapse:collapse; font-size:13px; }
-  .modal-box td{ padding:4px 6px; border-bottom:1px solid var(--menu-border); }
-  .modal-box kbd{ background:rgba(255,255,255,.12); border:1px solid var(--menu-border); border-radius:5px; padding:2px 7px; font-family:inherit; font-weight:700; font-size:12px; }
-  .modal-close{ margin-top:18px; width:100%; background:var(--btn); color:var(--btn-text); border:none; border-radius:8px; padding:10px; font-size:14px; font-weight:600; cursor:pointer; }
-  .modal-close:hover{ background:var(--btn-hover); }
+  .center-col{ flex:1; max-width:20%; display:flex; flex-direction:column; align-items:center; gap:clamp(4px,0.9vh,10px); min-height:0; }
 
-  /* ===== Zona cepat (lazy zone) ===== */
-  .lazy-zone{
-    position:fixed; bottom:18px; right:18px; width:66px; height:66px; border-radius:50%;
-    background:rgba(255,255,255,.12); border:2px dashed rgba(255,255,255,.45);
-    display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700;
-    color:var(--text); cursor:pointer; z-index:60; text-align:center; line-height:1.15;
-    user-select:none; backdrop-filter:blur(2px); padding:4px;
-  }
-  .lazy-zone:hover{ background:rgba(255,255,255,.2); }
+  .sets-row{ display:flex; align-items:center; justify-content:center; gap:clamp(8px,2vw,18px); }
+  .sets-box{ position:relative; min-width:clamp(56px,9vw,100px); width:auto; background:var(--red); color:#fff; text-align:center; font-family:var(--score-font);
+    font-size:clamp(26px,4.5vw,50px); padding:clamp(4px,1vh,10px) 10px; border-radius:4px; box-shadow:0 6px 14px rgba(0,0,0,.25); cursor:pointer;
+    flex-shrink:0; box-sizing:border-box; }
+  .sets-label{ color:#555; font-weight:800; font-size:clamp(11px,1.6vw,15px); letter-spacing:1px; }
 
-  /* ===== Tombol hamburger (toggle menu) ===== */
-  .hamburger-toggle{
-    position:fixed; bottom:18px; left:18px; width:52px; height:52px; border-radius:14px;
-    background:rgba(255,255,255,.12); border:2px solid rgba(255,255,255,.35);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
-    cursor:pointer; z-index:60; user-select:none; backdrop-filter:blur(2px); padding:0;
-  }
-  .hamburger-toggle:hover{ background:rgba(255,255,255,.2); }
-  .hamburger-toggle span{ display:block; width:22px; height:2.5px; background:var(--text); border-radius:2px; transition:transform .2s, opacity .2s; }
-  .hamburger-toggle.active span:nth-child(1){ transform:translateY(7.5px) rotate(45deg); }
-  .hamburger-toggle.active span:nth-child(2){ opacity:0; }
-  .hamburger-toggle.active span:nth-child(3){ transform:translateY(-7.5px) rotate(-45deg); }
+  .stat-row{ width:100%; background:var(--navy); border-radius:6px; display:flex; align-items:center;
+    justify-content:space-between; padding:clamp(3px,0.7vh,7px) clamp(8px,1.4vw,14px); }
+  .stat-num{ position:relative; font-family:var(--score-font); color:#fff; font-size:clamp(26px,4.4vw,44px); min-width:40px; width:auto;
+    padding:0 6px; text-align:center; cursor:pointer; flex-shrink:0; box-sizing:border-box; }
+  .stat-label{ text-align:center; flex:1; }
+  .stat-label .big{ color:#fff; font-weight:900; font-size:clamp(16px,2.6vw,26px); line-height:1.05; font-family:'Segoe UI',Arial,sans-serif; }
+  .stat-label .small{ color:#cfd6e6; font-weight:600; font-size:clamp(7px,1vw,10px); letter-spacing:.5px; margin-top:1px; }
 
-  /* ===== Overlay final pertandingan ===== */
-  .final-overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.82); z-index:150; display:none;
-    align-items:center; justify-content:center; flex-direction:column; text-align:center; overflow:hidden; cursor:pointer;
-  }
-  .final-overlay.open{ display:flex; }
-  .final-overlay h1{ font-size:clamp(20px,4vw,34px); font-weight:800; color:var(--score); margin:0; text-shadow:0 0 16px var(--bolt); position:relative; z-index:2; letter-spacing:1px; text-transform:uppercase; }
-  .final-overlay .final-sub{ font-size:clamp(16px,3.2vw,26px); font-weight:800; color:#fff; opacity:.95; margin:2px 0 14px; position:relative; z-index:2; letter-spacing:2px; text-transform:uppercase; }
-  .final-overlay .final-hint{ font-size:13px; color:#fff; opacity:.5; margin:0; position:relative; z-index:2; font-weight:500; }
-  .final-confetti{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
-  .final-burst-item{ position:absolute; opacity:0; pointer-events:none; }
-  .final-heart{ font-size:clamp(22px,4.4vw,40px); filter:drop-shadow(0 2px 5px rgba(0,0,0,.3)); }
-  .final-dot{ border-radius:50%; box-shadow:0 2px 6px rgba(0,0,0,.25); }
-  @keyframes winBurstPop{
-    0%{ opacity:0; transform:scale(.3) translateY(0); }
-    22%{ opacity:1; transform:scale(1.1) translateY(-6px); }
-    70%{ opacity:1; transform:scale(1) translateY(-42px); }
-    100%{ opacity:0; transform:scale(.9) translateY(-74px); }
-  }
+  .set-history{ display:grid; grid-template-columns:repeat(5, 1fr); gap:clamp(4px,1vw,10px); width:100%; }
+  .set-box{ display:flex; flex-direction:column; border-radius:4px; overflow:hidden; box-shadow:0 3px 8px rgba(0,0,0,.15); }
+  .set-box-head{ background:var(--red); color:#fff; text-align:center; font-weight:800; font-size:clamp(11px,1.8vw,17px); padding:5px 0; }
+  .set-box-body{ background:#fff; color:#111; text-align:center; font-family:var(--score-font); font-size:clamp(14px,2.6vw,26px);
+    padding:clamp(8px,1.6vh,16px) 4px; outline:none; cursor:text; flex:1; }
 
-  /* ===== Popup Tukar Sisi ===== */
-  .swap-overlay{ position:fixed; inset:0; z-index:300; display:none; flex-direction:column; align-items:center; justify-content:center; gap:8px; overflow:hidden; pointer-events:none; }
-  .swap-overlay.active{ display:flex; }
-  .swap-bg{ position:absolute; inset:0; background:#000; opacity:0; }
-  .swap-overlay.active .swap-bg{ animation:swapBgAnim 1.9s ease-in-out forwards; }
-  @keyframes swapBgAnim{
-    0%{ opacity:0; }
-    30%{ opacity:.88; }
-    70%{ opacity:.88; }
-    100%{ opacity:0; }
-  }
-  .swap-word{ position:relative; width:100%; text-align:center; font-size:clamp(24px,5.6vw,54px); font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#fff; opacity:0; z-index:2; text-shadow:0 0 18px rgba(0,0,0,.6); }
-  .swap-overlay.active .swap-word-left{ animation:swapLeftAnim 1.9s forwards; }
-  .swap-overlay.active .swap-word-right{ animation:swapRightAnim 1.9s forwards; }
-  @keyframes swapLeftAnim{
-    0%{ transform:translateX(-160vw); opacity:0; animation-timing-function:ease-out; }
-    16%{ opacity:1; }
-    36%{ transform:translateX(0); opacity:1; animation-timing-function:linear; }
-    64%{ transform:translateX(0); opacity:1; animation-timing-function:ease-in; }
-    100%{ transform:translateX(160vw); opacity:1; }
-  }
-  @keyframes swapRightAnim{
-    0%{ transform:translateX(160vw); opacity:0; animation-timing-function:ease-out; }
-    16%{ opacity:1; }
-    36%{ transform:translateX(0); opacity:1; animation-timing-function:linear; }
-    64%{ transform:translateX(0); opacity:1; animation-timing-function:ease-in; }
-    100%{ transform:translateX(-160vw); opacity:1; }
-  }
+  /* Floating minus button (edit mode) */
+  .float-minus{ position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:50%;
+    background:#1a1a1a; color:#fff; font-weight:800; font-size:15px; display:none; align-items:center; justify-content:center;
+    cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.45); z-index:20; border:2px solid #fff; }
+  body.edit-mode .float-minus{ display:flex; }
 
-  /* ===== Badai petir kemenangan ===== */
-  .final-lightning{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:1; }
-  .final-lightning .lightning-wrap{ position:absolute; top:0; left:var(--x,50%); width:170px; height:100%; right:auto; bottom:auto; transform:translateX(-50%); }
-  #finalFlash{ z-index:1; }
+  .ctrl-tab{ position:fixed; bottom:10px; right:10px; z-index:50; width:34px; height:34px; border-radius:50%;
+    background:rgba(0,0,0,.35); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; }
 
-  /* ===== Overlay iklan ===== */
-  .ads-overlay{ position:fixed; inset:0; background:#000; z-index:200; display:none; align-items:center; justify-content:center; cursor:pointer; }
-  .ads-overlay.open{ display:flex; }
-  .ads-media{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
-  .ads-media img, .ads-media video{ width:100%; height:100%; object-fit:cover; pointer-events:none; }
+  /* Settings popup: draggable floating card */
+  .controls{ position:fixed; bottom:56px; right:10px; z-index:49; background:rgba(15,15,20,.96); color:#fff;
+    display:none; flex-direction:column; width:min(340px,92vw); max-height:74vh; border-radius:14px;
+    box-shadow:0 16px 40px rgba(0,0,0,.45); overflow:hidden; }
+  .controls.open{ display:flex; }
+  .controls-header{ cursor:grab; background:rgba(255,255,255,.06); padding:10px 8px 10px 16px;
+    display:flex; align-items:center; justify-content:space-between; font-weight:800; font-size:13px;
+    letter-spacing:.5px; user-select:none; flex-shrink:0; }
+  .controls-header:active{ cursor:grabbing; }
+  .controls-header-actions{ display:flex; align-items:center; gap:6px; }
+  .controls-close{ width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,.12); display:flex;
+    align-items:center; justify-content:center; cursor:pointer; font-size:15px; }
+  .controls-close:hover{ background:rgba(255,255,255,.22); }
+  .controls-body{ display:flex; flex-wrap:wrap; gap:8px; padding:12px 14px; align-items:center; justify-content:center;
+    overflow-y:auto; }
+  .controls button{ background:#2c2c34; color:#fff; border:none; border-radius:6px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; }
+  .controls button:hover{ background:#3d3d46; }
+  .controls .divider{ width:100%; height:1px; background:rgba(255,255,255,.15); margin:2px 0; }
+  .controls label.inline{ display:flex; align-items:center; gap:6px; font-size:12px; opacity:.85; }
+  .controls input[type=color]{ width:34px; height:28px; border:none; border-radius:6px; padding:0; background:none; cursor:pointer; }
+  .controls input[type=number]{ width:64px; padding:5px 6px; border-radius:6px; border:1px solid #444; background:#1c1c22; color:#fff; }
+  .controls input[type=range]{ width:110px; }
+  .controls select{ padding:5px 6px; border-radius:6px; border:1px solid #444; background:#1c1c22; color:#fff; font-size:12px; }
+  input[type=file]{ display:none; }
+
+  /* Ads panel list */
+  .ads-section{ width:100%; }
+  .ad-row{ display:flex; align-items:center; gap:6px; padding:5px 6px; background:rgba(255,255,255,.05); border-radius:6px; }
+  .ad-icon{ font-size:14px; flex-shrink:0; }
+  .ad-name{ flex:1; min-width:0; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ad-row button{ padding:4px 8px; font-size:12px; flex-shrink:0; }
+  .ad-empty-note{ opacity:.55; font-size:12px; padding:4px 2px; }
+  .ad-audio-tag{ font-size:11px; opacity:.8; margin-left:4px; }
+
+  /* Save / Load slots */
+  .save-slot-list{ display:flex; flex-direction:column; gap:8px; }
+  .save-slot-row{ display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background:rgba(255,255,255,.06); border-radius:8px; padding:8px 10px; }
+  .save-slot-info{ font-size:12px; line-height:1.4; min-width:0; }
+  .save-slot-info span{ opacity:.65; font-size:11px; word-break:break-word; }
+  .save-slot-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .save-slot-actions button{ background:#2c2c34; color:#fff; border:none; border-radius:6px; padding:6px 10px; font-size:12px; font-weight:600; cursor:pointer; }
+  .save-slot-actions button:hover{ background:#3d3d46; }
+  .save-slot-actions .slot-load{ background:var(--red); }
+  .save-slot-actions .slot-load:hover{ background:#b81823; }
+
+  /* Fullscreen ad overlay */
+  .ad-overlay{ position:fixed; inset:0; z-index:300; background:#000; display:none; align-items:center; justify-content:center; cursor:pointer; }
+  .ad-overlay.open{ display:flex; }
+  .ad-overlay video{ width:100%; height:100%; object-fit:contain; display:none; background:#000; }
+  .ad-overlay.mode-video video{ display:block; }
+  .ad-audio-visual{ display:none; flex-direction:column; align-items:center; gap:16px; color:#fff; text-align:center; padding:20px; }
+  .ad-overlay.mode-audio .ad-audio-visual{ display:flex; }
+  .ad-audio-icon{ font-size:70px; animation:adPulse 1.4s ease-in-out infinite; }
+  @keyframes adPulse{ 0%,100%{ transform:scale(1); opacity:.85; } 50%{ transform:scale(1.12); opacity:1; } }
+  .ad-audio-name{ font-size:20px; font-weight:700; letter-spacing:.4px; max-width:80vw; word-break:break-word; }
+  .ad-audio-hint{ font-size:12px; opacity:.55; }
+  .ad-next-btn{ background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:20px;
+    padding:8px 18px; font-size:13px; cursor:pointer; }
+  .ad-next-btn:hover{ background:rgba(255,255,255,.22); }
+
+  /* Modal popup (Guide / Shortcuts) */
+  .modal-backdrop{ position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.55);
+    display:none; align-items:center; justify-content:center; padding:20px; }
+  .modal-backdrop.open{ display:flex; }
+  .modal-box{ background:#1c1c22; color:#fff; width:min(440px,92vw); max-height:80vh; overflow-y:auto;
+    border-radius:14px; box-shadow:0 20px 50px rgba(0,0,0,.5); }
+  .modal-header{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px;
+    font-weight:800; font-size:15px; border-bottom:1px solid rgba(255,255,255,.1); position:sticky; top:0; background:#1c1c22; }
+  .modal-close{ cursor:pointer; font-size:20px; line-height:1; opacity:.7; }
+  .modal-close:hover{ opacity:1; }
+  .modal-body{ padding:16px 18px; font-size:13px; line-height:1.75; opacity:.92; }
+  .modal-body b{ color:#fff; }
+  .modal-body p{ margin:0 0 10px; }
+
+  /* Shortcut customize grid */
+  .shortcut-grid{ display:grid; grid-template-columns:1fr 60px; gap:8px 10px; align-items:center; font-size:13px; }
+  .shortcut-grid input{ width:100%; text-align:center; text-transform:uppercase; padding:6px; border-radius:6px;
+    border:1px solid #444; background:#141418; color:#fff; font-weight:700; }
+  .shortcut-actions{ display:flex; gap:8px; margin-top:16px; }
+  .shortcut-actions button{ flex:1; background:#2c2c34; color:#fff; border:none; border-radius:6px; padding:9px 10px; font-size:13px; font-weight:700; cursor:pointer; }
+  .shortcut-actions button:hover{ background:#3d3d46; }
+  .shortcut-print-btn{ width:100%; margin-top:10px; background:var(--red) !important; }
+  .shortcut-print-btn:hover{ background:#b81823 !important; }
+
+  /* Printable control sheet (hidden on screen, shown only via print) */
+  .print-sheet{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    #printSheet, #printSheet *{ visibility:visible; }
+    #printSheet{ display:block !important; position:absolute; top:0; left:0; width:100%; padding:40px; font-family:'Segoe UI',Arial,sans-serif; color:#111; }
+    #printSheet h1{ font-size:24px; margin:0 0 4px; }
+    #printSheet .psub{ font-size:13px; color:#555; margin-bottom:26px; }
+    #printSheet .print-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0 44px; }
+    #printSheet .print-item{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #ddd; }
+    #printSheet .print-key{ display:inline-flex; align-items:center; justify-content:center; min-width:36px; height:32px; padding:0 9px;
+      border:2px solid #222; border-radius:7px; font-weight:800; font-family:monospace; font-size:16px; background:#f4f4f4; }
+    #printSheet .print-label{ font-size:14px; font-weight:600; }
+    #printSheet .print-footer{ margin-top:28px; font-size:11px; color:#777; }
+  }
 </style>
 </head>
-<body data-theme="dark">
+<body>
 
-  <div class="board">
-    <div class="team" id="teamA">
-      <div class="team-name" id="nameA" contenteditable="true" spellcheck="false">KEMALA 2</div>
-      <div class="badges-row">
-        <div class="badge sets-badge">
-          <span class="badge-label">Set</span>
-          <div class="badge-row">
-            <button class="badge-btn" data-adjust="setsA" data-dir="-1" type="button">−</button>
-            <span class="badge-val" id="setsAVal">0</span>
-            <button class="badge-btn" data-adjust="setsA" data-dir="1" type="button">+</button>
+  <div class="stage" id="stage">
+    <div class="bg-dots" id="bgDots"></div>
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+    <div class="edge-bar edge-left"></div>
+    <div class="edge-bar edge-right"></div>
+
+    <div class="content">
+
+      <div class="sponsors clean" id="sponsors"></div>
+
+      <div class="team-header">
+        <div class="banner banner-a"><span class="team-name" id="nameA" contenteditable spellcheck="false" data-placeholder="Nama Tim A">TERATAI KORPS BRIMOB</span></div>
+        <div class="crest crest-a" id="crestA" data-team="A">🛡️</div>
+        <div class="center-score" id="centerScore" title="Klik = mulai/jeda, klik kanan = reset">00:00</div>
+        <div class="crest crest-b" id="crestB" data-team="B">🏐</div>
+        <div class="banner banner-b"><span class="team-name" id="nameB" contenteditable spellcheck="false" data-placeholder="Nama Tim B">CINUS VC</span></div>
+      </div>
+
+      <div class="mid-row">
+        <div class="side-score-wrap" id="scoreA" data-team="A"><div class="side-score">11</div><div class="score-dot"></div></div>
+
+        <div class="center-col">
+          <div class="sets-row">
+            <div class="sets-box" id="setsA" data-team="A">0</div>
+            <div class="sets-label">SET</div>
+            <div class="sets-box" id="setsB" data-team="B">0</div>
+          </div>
+
+          <div class="stat-row" data-stat="vc">
+            <div class="stat-num" data-team="A">0</div>
+            <div class="stat-label"><div class="big">VC</div><div class="small">VIDEO CHALLENGE</div></div>
+            <div class="stat-num" data-team="B">0</div>
+          </div>
+          <div class="stat-row" data-stat="to">
+            <div class="stat-num" data-team="A">0</div>
+            <div class="stat-label"><div class="big">T-O</div><div class="small">TIME-OUTS</div></div>
+            <div class="stat-num" data-team="B">0</div>
+          </div>
+          <div class="stat-row" data-stat="sub">
+            <div class="stat-num" data-team="A">0</div>
+            <div class="stat-label"><div class="big">SUB</div><div class="small">SUBSTITUTIONS</div></div>
+            <div class="stat-num" data-team="B">0</div>
           </div>
         </div>
-      </div>
-      <div class="score-wrap">
-        <div class="score" id="scoreA">0</div>
-        <div class="hearts-wrap" id="heartsWrapA">
-          <span class="heart-particle" data-anim="L">💗</span>
-          <span class="heart-particle" data-anim="C">💕</span>
-          <span class="heart-particle" data-anim="R">💖</span>
-          <span class="heart-particle" data-anim="L">💘</span>
-          <span class="heart-particle" data-anim="C">💕</span>
-          <span class="heart-particle" data-anim="R">💗</span>
-          <span class="heart-particle" data-anim="L" data-level="2">💖</span>
-          <span class="heart-particle" data-anim="R" data-level="3">💘</span>
-          <span class="heart-particle" data-anim="C" data-level="4">💕</span>
-          <span class="heart-particle" data-anim="C" data-level="5">💗</span>
-        </div>
+
+        <div class="side-score-wrap" id="scoreB" data-team="B"><div class="side-score">11</div><div class="score-dot"></div></div>
       </div>
 
-      <div class="flash-overlay" id="flashA"></div>
-      <div class="lightning-wrap" id="boltWrapA">
-        <svg viewBox="0 0 200 380" preserveAspectRatio="none">
-          <path class="bolt-glow" pathLength="1" d="M100,0 L82,58 L118,64 L72,128 L122,134 L66,200 L128,206 L88,268 L112,274 L98,340"/>
-          <path class="branch-glow" pathLength="1" d="M118,64 L156,92 L138,104"/>
-          <path class="branch-glow" pathLength="1" d="M72,128 L34,158 L52,172"/>
-          <path class="branch-glow" pathLength="1" d="M128,206 L166,236 L148,248"/>
-          <path class="branch-glow" pathLength="1" data-level="4" d="M66,200 L28,222 L44,238"/>
-          <path class="branch-glow" pathLength="1" data-level="5" d="M88,268 L124,290 L108,304"/>
-          <path class="bolt-core" pathLength="1" d="M100,0 L82,58 L118,64 L72,128 L122,134 L66,200 L128,206 L88,268 L112,274 L98,340"/>
-          <path class="branch-core" pathLength="1" d="M118,64 L156,92 L138,104"/>
-          <path class="branch-core" pathLength="1" d="M72,128 L34,158 L52,172"/>
-          <path class="branch-core" pathLength="1" d="M128,206 L166,236 L148,248"/>
-          <path class="branch-core" pathLength="1" data-level="4" d="M66,200 L28,222 L44,238"/>
-          <path class="branch-core" pathLength="1" data-level="5" d="M88,268 L124,290 L108,304"/>
-          <circle class="ember ember-1" cx="82" cy="58" r="3"/>
-          <circle class="ember ember-2" cx="138" cy="104" r="2.4"/>
-          <circle class="ember ember-3" cx="72" cy="128" r="3"/>
-          <circle class="ember ember-4" cx="52" cy="172" r="2.4"/>
-          <circle class="ember ember-5" cx="66" cy="200" r="3"/>
-          <circle class="ember ember-6" cx="148" cy="248" r="2.4"/>
-          <circle class="ember ember-7" cx="88" cy="268" r="3"/>
-          <circle class="ember ember-8" cx="98" cy="340" r="2.4"/>
-        </svg>
-      </div>
+      <div class="set-history" id="setHistory"></div>
 
-      <div class="ink-wrap" id="inkWrapA">
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot" data-level="2"></span>
-        <span class="ink-dot" data-level="3"></span>
-        <span class="ink-dot" data-level="4"></span>
-        <span class="ink-dot" data-level="5"></span>
-      </div>
     </div>
 
-    <div class="team" id="teamB">
-      <div class="team-name" id="nameB" contenteditable="true" spellcheck="false">MEN I</div>
-      <div class="badges-row">
-        <div class="badge sets-badge">
-          <span class="badge-label">Set</span>
-          <div class="badge-row">
-            <button class="badge-btn" data-adjust="setsB" data-dir="-1" type="button">−</button>
-            <span class="badge-val" id="setsBVal">0</span>
-            <button class="badge-btn" data-adjust="setsB" data-dir="1" type="button">+</button>
+    <div class="ctrl-tab" id="ctrlTab" title="Buka/tutup kontrol">⚙</div>
+    <div class="controls" id="controls">
+      <div class="controls-header" id="controlsHeader">
+        <span>⚙ PENGATURAN</span>
+        <div class="controls-header-actions">
+          <span class="controls-close" id="controlsCenterBtn" title="Tengahkan panel">🎯</span>
+          <span class="controls-close" id="controlsClose" title="Tutup">×</span>
+        </div>
+      </div>
+      <div class="controls-body">
+        <button id="guideBtn">📖 Panduan</button>
+        <div class="divider"></div>
+        <button id="endSetBtn">Akhiri Set →</button>
+        <button id="swapBtn">Tukar Sisi</button>
+        <button id="resetSetBtn">Reset Skor Set</button>
+        <button id="resetAllBtn">Reset Semua</button>
+        <button id="fsBtn">Layar Penuh</button>
+        <div class="divider"></div>
+        <button id="timerToggleBtn">▶ / ⏸ Timer</button>
+        <button id="timerMinus">−10 dtk</button>
+        <button id="timerPlus">+10 dtk</button>
+        <button id="timerResetBtn">Reset Timer</button>
+        <div class="divider"></div>
+        <label class="inline">Ukuran Skor <input type="range" id="scoreSizeInput" min="50" max="500" value="100"></label>
+        <label class="inline">Ukuran Logo Klub <input type="range" id="crestSizeInput" min="40" max="250" value="100"></label>
+        <div class="divider"></div>
+        <label class="inline">Font Skor
+          <select id="fontSelect">
+            <option value="default">Default</option>
+            <option value="blackops">Black Ops One</option>
+            <option value="arialnarrow">Arial Narrow</option>
+            <option value="impact">Impact</option>
+            <option value="arial">Arial</option>
+          </select>
+        </label>
+        <label class="inline">Warna Font <input type="color" id="scoreColorInput" value="#ffffff"></label>
+        <label class="inline">Warna Outline <input type="color" id="scoreStrokeInput" value="#d81f2a"></label>
+        <div class="divider"></div>
+        <button id="sponsorAddBtnPanel">+ Tambah Logo Sponsor</button>
+        <div class="divider"></div>
+        <label class="inline">Warna Latar <input type="color" id="bgColorInput" value="#e7e9ea"></label>
+        <button id="bgImageBtn">Gambar Latar</button>
+        <button id="bgResetBtn">Reset Latar</button>
+        <div class="divider"></div>
+        <div class="ads-section">
+          <div style="font-size:12px;font-weight:800;opacity:.8;margin-bottom:6px;">🎬 IKLAN (VIDEO + AUDIO)</div>
+          <div id="adsList" style="display:flex;flex-direction:column;gap:4px;max-height:150px;overflow-y:auto;margin-bottom:8px;"></div>
+          <div style="display:flex;gap:6px;">
+            <button id="adAddVideoBtnPanel" style="flex:1;">+ Video</button>
+            <button id="adAddAudioBtnPanel" style="flex:1;">+ Audio</button>
           </div>
         </div>
+        <div class="divider"></div>
+        <button id="saveLoadBtn" style="width:100%;">💾 Simpan / Muat Game</button>
+        <div class="divider"></div>
+        <button id="shortcutBtn" style="width:100%;">⌨️ Kustomisasi &amp; Cetak Kontrol</button>
       </div>
-      <div class="score-wrap">
-        <div class="score" id="scoreB">0</div>
-        <div class="hearts-wrap" id="heartsWrapB">
-          <span class="heart-particle" data-anim="L">💗</span>
-          <span class="heart-particle" data-anim="C">💕</span>
-          <span class="heart-particle" data-anim="R">💖</span>
-          <span class="heart-particle" data-anim="L">💘</span>
-          <span class="heart-particle" data-anim="C">💕</span>
-          <span class="heart-particle" data-anim="R">💗</span>
-          <span class="heart-particle" data-anim="L" data-level="2">💖</span>
-          <span class="heart-particle" data-anim="R" data-level="3">💘</span>
-          <span class="heart-particle" data-anim="C" data-level="4">💕</span>
-          <span class="heart-particle" data-anim="C" data-level="5">💗</span>
+    </div>
+
+    <div class="modal-backdrop" id="guideBackdrop">
+      <div class="modal-box">
+        <div class="modal-header">📖 Panduan Penggunaan <span class="modal-close" id="guideClose">×</span></div>
+        <div class="modal-body">
+          <p><b>Mode Edit</b> — klik tombol ⚙ di pojok kanan bawah untuk membuka panel pengaturan dan mengaktifkan mode edit. Angka skor/set/VC/T-O/SUB bisa ditambah dengan klik biasa kapan saja. Selama mode edit aktif, tombol "−" kecil muncul di setiap angka, dan menahan (tekan lama) atau klik kanan pada angka akan menguranginya.</p>
+          <p><b>Skor & Statistik</b> — klik angka untuk menambah (bisa di luar mode edit juga). Untuk mengurangi, aktifkan mode edit lalu klik tombol "−" merah, tekan lama, atau klik kanan pada angka.</p>
+          <p><b>Akhiri Set</b> — tombol "Akhiri Set →" mencatat skor set saat ini ke kotak riwayat set, menambah jumlah set pemenang, lalu me-reset skor & statistik untuk set berikutnya. Skor akhir TIDAK direset otomatis, jadi penonton tetap bisa melihat hasil akhir sampai Anda menekan tombol ini.</p>
+          <p><b>Jam Pertandingan</b> — klik jam untuk mulai/jeda saat mode edit tidak aktif. Saat mode edit aktif, klik jam untuk mengetik ulang waktunya secara manual. Klik kanan jam atau tombol "Reset Timer" akan meminta konfirmasi sebelum me-reset.</p>
+          <p><b>Font & Warna Skor</b> — pilih jenis huruf (termasuk Black Ops One), warna isi angka, dan warna outline angka besar dari panel pengaturan.</p>
+          <p><b>Iklan Video/Audio</b> — tambahkan iklan video lewat "+ Video" atau iklan audio lewat "+ Audio" di panel pengaturan. Untuk iklan video, Anda bisa memasang trek audio terpisah dengan tombol 🎵+ pada daftar iklan; jika terpasang, audio terpisah itu yang berbunyi (video tampil bisu), dan jika tidak ada audio terpisah, suara asli videonya sendiri yang diputar. Klik ▶ untuk memutar layar penuh, berulang (loop) sampai layar diklik. Volume selalu memudar masuk/keluar agar penonton tidak kaget. Iklan audio (tanpa video) mengingat posisi terakhirnya dan bisa ditumpuk sebagai antrean — gunakan tombol "Lagu Berikutnya" di layar untuk berpindah ke iklan audio berikutnya.</p>
+          <p><b>Ukuran Logo Klub</b> — geser "Ukuran Logo Klub" di panel pengaturan untuk memperbesar/memperkecil logo tanpa mengubah ukuran lainnya.</p>
+          <p><b>Klik Kanan = Kurangi</b> — klik kanan (RMB) pada skor, set, VC, T-O, atau SUB manapun akan langsung menguranginya satu, kapan saja (tidak perlu mode edit).</p>
+          <p><b>Titik Penanda Skor</b> — titik kecil muncul di bawah skor tim yang baru saja mencetak poin, memudahkan mengetahui siapa yang terakhir mencetak.</p>
+          <p><b>Simpan / Muat Game</b> — gunakan "💾 Simpan / Muat Game" untuk menyimpan seluruh kondisi papan skor ke salah satu slot (seperti save game), dan memuatnya kembali kapan pun dibutuhkan — tanpa perlu file ekspor/impor.</p>
+          <p><b>Panel Pengaturan</b> — panel ini bisa digeser (drag) ke posisi mana pun dengan menahan bagian judul di atas. Klik ikon 🎯 di judul panel untuk mengembalikannya ke posisi semula.</p>
+          <p><b>Kustomisasi Kontrol</b> — buka "⌨️ Kustomisasi & Cetak Kontrol" untuk mengganti tombol keyboard pintasan, atau mencetak lembar referensi kontrol.</p>
+          <p><b>Keyboard (default):</b> Q/A skor A, U/J skor B, W/S set A, I/K set B, N akhiri set (hanya saat mode edit aktif) — T timer, F layar penuh, H buka/tutup panel (selalu aktif). Tombol ini dapat diganti lewat menu Kustomisasi Kontrol.</p>
         </div>
       </div>
-
-      <div class="flash-overlay" id="flashB"></div>
-      <div class="lightning-wrap" id="boltWrapB">
-        <svg viewBox="0 0 200 380" preserveAspectRatio="none">
-          <path class="bolt-glow" pathLength="1" d="M100,0 L118,58 L82,64 L128,128 L78,134 L134,200 L72,206 L112,268 L88,274 L102,340"/>
-          <path class="branch-glow" pathLength="1" d="M82,64 L44,92 L62,104"/>
-          <path class="branch-glow" pathLength="1" d="M128,128 L166,158 L148,172"/>
-          <path class="branch-glow" pathLength="1" d="M72,206 L34,236 L52,248"/>
-          <path class="branch-glow" pathLength="1" data-level="4" d="M134,200 L172,222 L156,238"/>
-          <path class="branch-glow" pathLength="1" data-level="5" d="M112,268 L76,290 L92,304"/>
-          <path class="bolt-core" pathLength="1" d="M100,0 L118,58 L82,64 L128,128 L78,134 L134,200 L72,206 L112,268 L88,274 L102,340"/>
-          <path class="branch-core" pathLength="1" d="M82,64 L44,92 L62,104"/>
-          <path class="branch-core" pathLength="1" d="M128,128 L166,158 L148,172"/>
-          <path class="branch-core" pathLength="1" d="M72,206 L34,236 L52,248"/>
-          <path class="branch-core" pathLength="1" data-level="4" d="M134,200 L172,222 L156,238"/>
-          <path class="branch-core" pathLength="1" data-level="5" d="M112,268 L76,290 L92,304"/>
-          <circle class="ember ember-1" cx="118" cy="58" r="3"/>
-          <circle class="ember ember-2" cx="62" cy="104" r="2.4"/>
-          <circle class="ember ember-3" cx="128" cy="128" r="3"/>
-          <circle class="ember ember-4" cx="148" cy="172" r="2.4"/>
-          <circle class="ember ember-5" cx="134" cy="200" r="3"/>
-          <circle class="ember ember-6" cx="52" cy="248" r="2.4"/>
-          <circle class="ember ember-7" cx="112" cy="268" r="3"/>
-          <circle class="ember ember-8" cx="102" cy="340" r="2.4"/>
-        </svg>
-      </div>
-
-      <div class="ink-wrap" id="inkWrapB">
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot"></span>
-        <span class="ink-dot" data-level="2"></span>
-        <span class="ink-dot" data-level="3"></span>
-        <span class="ink-dot" data-level="4"></span>
-        <span class="ink-dot" data-level="5"></span>
-      </div>
-    </div>
-  </div>
-
-  <div class="size-controls" id="sizeControls">
-    <div class="size-item"><label for="nameSize">Ukuran Nama</label><input type="range" id="nameSize" min="24" max="110" value="64"></div>
-    <div class="size-item"><label for="scoreSize">Ukuran Skor</label><input type="range" id="scoreSize" min="100" max="440" value="260"></div>
-  </div>
-
-  <div class="controls" id="mainControls">
-    <button id="undoBtn">↶ Undo</button>
-    <button id="redoBtn">↷ Redo</button>
-    <button id="swap">Tukar Sisi</button>
-    <button id="resetScore">Reset Skor</button>
-    <button id="resetAll">Reset Semua</button>
-
-    <div class="theme-wrap">
-      <button id="themeToggle">Tema ▾</button>
-      <div class="theme-menu" id="themeMenu">
-        <button data-theme-value="dark">Gelap</button>
-        <button data-theme-value="light">Terang</button>
-        <button data-theme-value="navy">Biru Navy</button>
-        <button data-theme-value="maroon">Merah Marun</button>
-      </div>
-    </div>
-    <div class="theme-wrap">
-      <button id="animAToggle">Animasi A ▾</button>
-      <div class="theme-menu" id="animAMenu">
-        <button data-anim-value="lightning">⚡ Petir</button>
-        <button data-anim-value="hearts">💕 Cinta</button>
-        <button data-anim-value="ink">🎨 Tinta</button>
-        <button data-anim-value="none">Tanpa Animasi</button>
-      </div>
-    </div>
-    <div class="theme-wrap">
-      <button id="animBToggle">Animasi B ▾</button>
-      <div class="theme-menu" id="animBMenu">
-        <button data-anim-value="lightning">⚡ Petir</button>
-        <button data-anim-value="hearts">💕 Cinta</button>
-        <button data-anim-value="ink">🎨 Tinta</button>
-        <button data-anim-value="none">Tanpa Animasi</button>
-      </div>
-    </div>
-    <button id="toggleBadges">Sembunyikan Set</button>
-
-    <div class="theme-wrap">
-      <button id="colorToggle">Warna &amp; Latar ▾</button>
-      <div class="theme-menu panel-menu" id="colorMenu">
-        <div class="field-row"><label>Gunakan warna kustom</label><input type="checkbox" id="useCustomColors"></div>
-        <div class="field-row"><label>Warna Nama</label><input type="color" id="colorName" value="#ffffff"></div>
-        <div class="field-row"><label>Warna Skor</label><input type="color" id="colorScore" value="#f5e40a"></div>
-        <div class="field-row"><label>Warna Latar</label><input type="color" id="colorBg" value="#1c1c1c"></div>
-        <div class="field-row"><label>Gambar Latar</label><button class="mini-btn" id="bgUploadBtn" type="button">Unggah</button></div>
-        <div class="field-row"><label>Hapus Gambar</label><button class="mini-btn" id="bgRemoveBtn" type="button">Hapus</button></div>
-        <div class="field-row"><label>Transparansi Panel</label><input type="range" id="panelAlpha" min="0" max="100" value="100"></div>
-        <input type="file" id="bgFileInput" accept="image/*" style="display:none">
-      </div>
     </div>
 
-    <div class="theme-wrap">
-      <button id="saveMenuToggle">Simpan/Muat ▾</button>
-      <div class="theme-menu panel-menu" id="saveMenu">
-        <div class="field-row">
-          <input type="text" id="slotName" placeholder="Nama slot..." style="flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--menu-border); background:var(--bg); color:var(--text);">
-          <button class="mini-btn" id="slotSaveBtn" type="button">Simpan</button>
+    <div class="modal-backdrop" id="shortcutBackdrop">
+      <div class="modal-box">
+        <div class="modal-header">⌨️ Kustomisasi Kontrol <span class="modal-close" id="shortcutClose">×</span></div>
+        <div class="modal-body">
+          <div class="shortcut-grid" id="shortcutGrid"></div>
+          <div class="shortcut-actions">
+            <button id="shortcutSaveBtn">Simpan</button>
+            <button id="shortcutResetBtn">Reset Default</button>
+          </div>
+          <button id="printControlsBtn" class="shortcut-print-btn">🖨️ Cetak Lembar Kontrol</button>
         </div>
-        <div class="slot-list" id="slotList"></div>
       </div>
     </div>
 
-    <div class="theme-wrap">
-      <button id="settingsToggle">Pengaturan ▾</button>
-      <div class="theme-menu panel-menu" id="settingsMenu">
-        <div class="field-row"><label>Skor Akhir (target menang)</label><input type="number" id="finalScoreInput" min="1" value="25"></div>
+    <div class="modal-backdrop" id="saveLoadBackdrop">
+      <div class="modal-box">
+        <div class="modal-header">💾 Simpan / Muat Game <span class="modal-close" id="saveLoadClose">×</span></div>
+        <div class="modal-body">
+          <p style="margin-top:0;">Simpan kondisi papan skor saat ini ke salah satu slot, atau muat kembali slot yang tersimpan sebelumnya — seperti save game.</p>
+          <div class="save-slot-list" id="saveSlotList"></div>
+        </div>
       </div>
     </div>
 
-    <div class="theme-wrap">
-      <button id="adsToggle">Iklan ▾</button>
-      <div class="theme-menu panel-menu" id="adsMenu">
-        <div class="field-row"><label>Unggah media (gambar/gif/video)</label><button class="mini-btn" id="adsUploadBtn" type="button">Unggah</button></div>
-        <div class="field-row"><label>Suara video</label><input type="checkbox" id="adsSoundToggle"></div>
-        <div class="field-row"><label>Musik latar (bisa pilih banyak file)</label><button class="mini-btn" id="adsMusicUploadBtn" type="button">Unggah Musik</button></div>
-        <div class="field-row" id="adsMusicStatusRow" style="display:none;"><label>Musik tersimpan</label><span id="adsMusicStatus" style="opacity:.75; font-size:12px;">0 file</span></div>
-        <div class="field-row"><label>Putar iklan</label><button class="mini-btn" id="adsPlayBtn" type="button">Putar</button></div>
-        <input type="file" id="adsFileInput" accept="image/*,video/*" style="display:none">
-        <input type="file" id="adsMusicFileInput" accept="audio/*" multiple style="display:none">
+    <div class="ad-overlay" id="adOverlay">
+      <video id="adVideoEl" playsinline></video>
+      <div class="ad-audio-visual">
+        <div class="ad-audio-icon">🎵</div>
+        <div class="ad-audio-name" id="adAudioName"></div>
+        <button class="ad-next-btn" id="adNextBtn">Lagu Berikutnya ▸</button>
+        <div class="ad-audio-hint">Klik di mana saja untuk berhenti</div>
       </div>
     </div>
 
-    <button id="guideBtn">Panduan</button>
-  </div>
-  <div class="status" id="status"></div>
+    <div id="printSheet" class="print-sheet"></div>
 
-  <button class="hamburger-toggle" id="toggleMenu" title="Tampilkan/Sembunyikan Menu" type="button">
-    <span></span><span></span><span></span>
-  </button>
-
-  <div class="lazy-zone" id="lazyZone" title="Klik kiri = Tim A +1, Klik kanan = Tim B +1, Scroll atas = Tim A -1, Scroll bawah = Tim B -1">Zona<br>Cepat<br>A/B</div>
-
-  <div class="swap-overlay" id="swapOverlay">
-    <div class="swap-bg"></div>
-    <span class="swap-word swap-word-left">Switching</span>
-    <span class="swap-word swap-word-right">Side</span>
-  </div>
-
-  <div class="final-overlay" id="finalOverlay">
-    <div class="final-confetti" id="finalConfetti"></div>
-    <div class="final-lightning" id="finalLightning"></div>
-    <div class="flash-overlay" id="finalFlash" style="border-radius:0;"></div>
-    <h1 id="finalTeamName">TIM</h1>
-    <p class="final-sub">Menang</p>
-    <p class="final-hint">(tap anywhere to continue)</p>
-  </div>
-
-  <div class="ads-overlay" id="adsOverlay">
-    <div class="ads-media" id="adsMediaContainer"></div>
-  </div>
-
-  <div class="modal-overlay" id="guideOverlay">
-    <div class="modal-box">
-      <h2>Panduan Papan Skor</h2>
-      <h3>Sentuhan / Klik</h3>
-      <ul>
-        <li>Ketuk (klik kiri / LMB) area panel tim (bukan nama/badge) → skor tim +1, disertai animasi yang dipilih</li>
-        <li>Klik kanan (RMB) pada area panel tim → skor tim itu -1. Skor hanya dikontrol lewat LMB dan RMB</li>
-        <li><b>Zona Cepat</b> di pojok kanan bawah: klik kiri = Tim A +1, klik kanan = Tim B +1, scroll ke atas = Tim A -1, scroll ke bawah = Tim B -1</li>
-        <li>Badge <b>Set</b> (di tengah, antara kedua tim) punya tombol − dan + sendiri</li>
-        <li>Nama tim bisa diketik langsung (klik lalu ubah teks)</li>
-        <li><b>Undo</b> / <b>Redo</b> membatalkan atau mengulangi perubahan skor terakhir</li>
-        <li>Geser slider <b>Ukuran Nama</b> / <b>Ukuran Skor</b> untuk mengubah besar font</li>
-        <li>Tombol <b>☰</b> (hamburger) di pojok kiri bawah menyembunyikan/menampilkan seluruh menu kontrol</li>
-        <li><b>Tukar Sisi</b> menampilkan popup "Switching" (dari kiri) dan "Side" (dari kanan) yang bertemu di tengah sambil melambat, latar menggelap, lalu skor & data tim ditukar tepat saat layar paling gelap sebelum memudar</li>
-        <li><b>Reset Skor</b>, <b>Reset Semua</b> seperti biasa</li>
-        <li>Menu <b>Tema</b> memilih skema warna bawaan; menu <b>Warna &amp; Latar</b> mengatur warna kustom, gambar latar, dan transparansi panel</li>
-        <li>Menu <b>Animasi A</b> / <b>Animasi B</b> memilih animasi tiap tim: Petir, Cinta, Tinta, atau Tanpa Animasi. Semakin unggul suatu tim (maks. selisih 5 poin), animasinya makin intens/besar. Animasi Cinta muncul menyebar di posisi acak di sekitar skor</li>
-        <li>Menu <b>Simpan/Muat</b> menyimpan/memuat data ke penyimpanan internal lewat nama slot (tanpa unduh file manual)</li>
-        <li>Menu <b>Pengaturan</b> mengatur skor akhir pertandingan. Saat tim unggul mencapai skor akhir dengan selisih ≥2 (aturan deuce otomatis berlaku), animasi kemenangan layar penuh akan muncul dan terus berulang tanpa henti (Petir, Cinta, maupun Tinta) sampai layar diklik di mana saja</li>
-        <li>Menu <b>Iklan</b> mengunggah gambar/gif/video untuk diputar layar penuh (mengisi seluruh layar). Suara video mengikuti pengaturan <b>Suara video</b> di menu ini. Bisa juga mengunggah beberapa file <b>Musik latar</b> sekaligus — akan diputar berurutan sebagai antrean, memudar masuk/keluar agar tidak mengagetkan, dan jika iklan ditutup lalu diputar lagi, musik melanjutkan dari detik terakhir sebelumnya. Ketuk di mana saja pada layar iklan untuk menutupnya</li>
-      </ul>
-      <h3>Kontrol Keyboard — Tim A (kiri)</h3>
-      <table>
-        <tr><td><kbd>W</kbd></td><td>Set +1</td></tr>
-        <tr><td><kbd>S</kbd></td><td>Set -1</td></tr>
-      </table>
-      <h3>Kontrol Keyboard — Tim B (kanan)</h3>
-      <table>
-        <tr><td><kbd>I</kbd></td><td>Set +1</td></tr>
-        <tr><td><kbd>K</kbd></td><td>Set -1</td></tr>
-      </table>
-      <h3>Kontrol Keyboard — Umum</h3>
-      <table>
-        <tr><td><kbd>X</kbd></td><td>Tukar sisi</td></tr>
-        <tr><td><kbd>0</kbd></td><td>Reset skor &amp; set</td></tr>
-        <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td>Undo</td></tr>
-        <tr><td><kbd>Ctrl</kbd>+<kbd>Y</kbd></td><td>Redo</td></tr>
-      </table>
-      <p style="font-size:12px;opacity:.6;margin-top:12px;">Catatan: skor hanya diubah lewat klik kiri (LMB) dan klik kanan (RMB) pada panel tim / Zona Cepat. Pintasan keyboard nonaktif saat sedang mengetik nama tim. Gambar latar &amp; media iklan hanya tersimpan selama sesi ini (tidak ikut tersimpan otomatis) karena ukurannya besar.</p>
-      <button class="modal-close" id="guideClose">Tutup</button>
-    </div>
+    <input type="file" id="fileInput" accept="image/*">
+    <input type="file" id="adVideoFileInput" accept="video/*" multiple>
+    <input type="file" id="adAudioFileInput" accept="audio/*" multiple>
+    <input type="file" id="adAttachAudioInput" accept="audio/*">
   </div>
 
 <script>
-const STORAGE_KEY = 'papan-skor-voli-state';
-const SLOT_PREFIX = 'papan-skor-voli-slot-';
+const STORAGE_KEY = 'volleyballScoreboard_v4';
+const NUM_SETS = 5;
+
+const DEFAULT_SHORTCUTS = {
+  scoreAPlus:'q', scoreAMinus:'a',
+  scoreBPlus:'u', scoreBMinus:'j',
+  setAPlus:'w', setAMinus:'s',
+  setBPlus:'i', setBMinus:'k',
+  endSet:'n', timer:'t', fullscreen:'f', panel:'h'
+};
+const SHORTCUT_LABELS = {
+  scoreAPlus:'Tambah Skor A', scoreAMinus:'Kurangi Skor A',
+  scoreBPlus:'Tambah Skor B', scoreBMinus:'Kurangi Skor B',
+  setAPlus:'Tambah Set A', setAMinus:'Kurangi Set A',
+  setBPlus:'Tambah Set B', setBMinus:'Kurangi Set B',
+  endSet:'Akhiri Set', timer:'Mulai/Jeda Timer', fullscreen:'Layar Penuh', panel:'Buka/Tutup Panel'
+};
+const FONT_OPTIONS = {
+  default: "fantasy, 'Black Ops One', 'Arial Narrow', sans-serif",
+  blackops: "'Black Ops One', fantasy, sans-serif",
+  arialnarrow: "'Arial Narrow', Arial, sans-serif",
+  impact: "Impact, 'Arial Narrow', sans-serif",
+  arial: "Arial, Helvetica, sans-serif"
+};
+
+let state = {
+  nameA:'TERATAI KORPS BRIMOB', nameB:'CINUS VC',
+  crestA:null, crestB:null,
+  sponsors:[],
+  scoreA:11, scoreB:11,
+  setsA:0, setsB:0,
+  vcA:0, vcB:0, toA:0, toB:0, subA:0, subB:0,
+  sets: Array(NUM_SETS).fill(''),
+  bgColor:null, bgImage:null,
+  timer:{ elapsedMs:0, running:false, startedAt:null },
+  scoreScale:1,
+  crestScale:1,
+  lastScorer:null,
+  scoreFont:'default', scoreColor:'#ffffff', scoreStroke:'#d81f2a',
+  ads:[],
+  shortcuts: Object.assign({}, DEFAULT_SHORTCUTS)
+};
+
+/* Old ad shape was {type:'video'|'audio', src}. New shape is {videoSrc, audioSrc}
+   so a single ad can carry both a video and its own separate audio track. */
+function migrateAds(){
+  if(!Array.isArray(state.ads)) { state.ads = []; return; }
+  state.ads = state.ads.map(a=>{
+    if(a.videoSrc !== undefined || a.audioSrc !== undefined) return a;
+    if(a.type === 'video') return { id:a.id, name:a.name, videoSrc:a.src, audioSrc:null };
+    return { id:a.id, name:a.name, videoSrc:null, audioSrc:a.src };
+  });
+}
+
+function applyStateToUI(){
+  render();
+  applyBackground();
+  applyScoreStyle();
+  renderTimer();
+  document.getElementById('scoreSizeInput').value = Math.round(state.scoreScale*100);
+  document.documentElement.style.setProperty('--score-scale', state.scoreScale);
+  document.getElementById('crestSizeInput').value = Math.round((state.crestScale||1)*100);
+  document.documentElement.style.setProperty('--crest-scale', state.crestScale||1);
+  document.getElementById('fontSelect').value = state.scoreFont;
+  document.getElementById('scoreColorInput').value = state.scoreColor;
+  document.getElementById('scoreStrokeInput').value = state.scoreStroke;
+  document.getElementById('bgColorInput').value = state.bgColor || '#e7e9ea';
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = Object.assign(state, parsed);
+      state.shortcuts = Object.assign({}, DEFAULT_SHORTCUTS, parsed.shortcuts || {});
+      migrateAds();
+    }
+  }catch(e){}
+  applyStateToUI();
+}
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+/* ==================== SAVE / LOAD GAME SLOTS ==================== */
+const SAVE_SLOTS = 5;
+function slotKey(i){ return STORAGE_KEY + '_slot' + i; }
+function getSlotData(i){
+  try{
+    const raw = localStorage.getItem(slotKey(i));
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function renderSaveSlots(){
+  const list = document.getElementById('saveSlotList');
+  if(!list) return;
+  list.innerHTML = '';
+  for(let i=1;i<=SAVE_SLOTS;i++){
+    const data = getSlotData(i);
+    const row = document.createElement('div');
+    row.className = 'save-slot-row';
+    const info = data
+      ? (data.state.nameA+' vs '+data.state.nameB+'<br><span>'+new Date(data.savedAt).toLocaleString('id-ID')+'</span>')
+      : '<span>Slot kosong</span>';
+    row.innerHTML =
+      '<div class="save-slot-info"><b>Slot '+i+'</b><br>'+info+'</div>'+
+      '<div class="save-slot-actions">'+
+      '<button class="slot-save" data-idx="'+i+'">Simpan</button>'+
+      (data ? '<button class="slot-load" data-idx="'+i+'">Muat</button><button class="slot-del" data-idx="'+i+'">🗑</button>' : '')+
+      '</div>';
+    list.appendChild(row);
+  }
+  list.querySelectorAll('.slot-save').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = b.dataset.idx;
+      if(getSlotData(i) && !confirm('Timpa data di Slot '+i+'?')) return;
+      localStorage.setItem(slotKey(i), JSON.stringify({ state: state, savedAt: Date.now() }));
+      renderSaveSlots();
+    });
+  });
+  list.querySelectorAll('.slot-load').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = b.dataset.idx;
+      const data = getSlotData(i);
+      if(!data) return;
+      if(!confirm('Muat Slot '+i+'? Perubahan yang belum disimpan pada papan skor saat ini akan hilang.')) return;
+      state = Object.assign({}, state, data.state);
+      state.shortcuts = Object.assign({}, DEFAULT_SHORTCUTS, data.state.shortcuts || {});
+      migrateAds();
+      save();
+      applyStateToUI();
+      closeSaveLoadModal();
+    });
+  });
+  list.querySelectorAll('.slot-del').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = b.dataset.idx;
+      if(!confirm('Hapus Slot '+i+'?')) return;
+      localStorage.removeItem(slotKey(i));
+      renderSaveSlots();
+    });
+  });
+}
+const saveLoadBackdrop = document.getElementById('saveLoadBackdrop');
+function openSaveLoadModal(){ renderSaveSlots(); saveLoadBackdrop.classList.add('open'); }
+function closeSaveLoadModal(){ saveLoadBackdrop.classList.remove('open'); }
+document.getElementById('saveLoadBtn').addEventListener('click', openSaveLoadModal);
+document.getElementById('saveLoadClose').addEventListener('click', closeSaveLoadModal);
+saveLoadBackdrop.addEventListener('click', (e)=>{ if(e.target === saveLoadBackdrop) closeSaveLoadModal(); });
 
 const el = {
   nameA: document.getElementById('nameA'),
   nameB: document.getElementById('nameB'),
+  crestA: document.getElementById('crestA'),
+  crestB: document.getElementById('crestB'),
+  centerScore: document.getElementById('centerScore'),
   scoreA: document.getElementById('scoreA'),
   scoreB: document.getElementById('scoreB'),
-  setsAVal: document.getElementById('setsAVal'),
-  setsBVal: document.getElementById('setsBVal'),
-  teamA: document.getElementById('teamA'),
-  teamB: document.getElementById('teamB'),
-  boltWrapA: document.getElementById('boltWrapA'),
-  boltWrapB: document.getElementById('boltWrapB'),
-  flashA: document.getElementById('flashA'),
-  flashB: document.getElementById('flashB'),
-  heartsWrapA: document.getElementById('heartsWrapA'),
-  heartsWrapB: document.getElementById('heartsWrapB'),
-  inkWrapA: document.getElementById('inkWrapA'),
-  inkWrapB: document.getElementById('inkWrapB'),
-  status: document.getElementById('status'),
-  body: document.body,
-  root: document.documentElement,
-  themeMenu: document.getElementById('themeMenu'),
-  themeToggle: document.getElementById('themeToggle'),
-  animAMenu: document.getElementById('animAMenu'),
-  animAToggle: document.getElementById('animAToggle'),
-  animBMenu: document.getElementById('animBMenu'),
-  animBToggle: document.getElementById('animBToggle'),
-  nameSize: document.getElementById('nameSize'),
-  scoreSize: document.getElementById('scoreSize'),
-  guideBtn: document.getElementById('guideBtn'),
-  guideOverlay: document.getElementById('guideOverlay'),
-  guideClose: document.getElementById('guideClose'),
-  toggleBadges: document.getElementById('toggleBadges'),
-  badgesRows: document.querySelectorAll('.badges-row'),
-  toggleMenu: document.getElementById('toggleMenu'),
-  mainControls: document.getElementById('mainControls'),
-  sizeControls: document.getElementById('sizeControls'),
-  undoBtn: document.getElementById('undoBtn'),
-  redoBtn: document.getElementById('redoBtn'),
-  lazyZone: document.getElementById('lazyZone'),
-  colorToggle: document.getElementById('colorToggle'),
-  colorMenu: document.getElementById('colorMenu'),
-  useCustomColors: document.getElementById('useCustomColors'),
-  colorName: document.getElementById('colorName'),
-  colorScore: document.getElementById('colorScore'),
-  colorBg: document.getElementById('colorBg'),
-  bgUploadBtn: document.getElementById('bgUploadBtn'),
-  bgRemoveBtn: document.getElementById('bgRemoveBtn'),
-  bgFileInput: document.getElementById('bgFileInput'),
-  panelAlpha: document.getElementById('panelAlpha'),
-  saveMenuToggle: document.getElementById('saveMenuToggle'),
-  saveMenu: document.getElementById('saveMenu'),
-  slotName: document.getElementById('slotName'),
-  slotSaveBtn: document.getElementById('slotSaveBtn'),
-  slotList: document.getElementById('slotList'),
-  settingsToggle: document.getElementById('settingsToggle'),
-  settingsMenu: document.getElementById('settingsMenu'),
-  finalScoreInput: document.getElementById('finalScoreInput'),
-  adsToggle: document.getElementById('adsToggle'),
-  adsMenu: document.getElementById('adsMenu'),
-  adsUploadBtn: document.getElementById('adsUploadBtn'),
-  adsSoundToggle: document.getElementById('adsSoundToggle'),
-  adsMusicUploadBtn: document.getElementById('adsMusicUploadBtn'),
-  adsMusicFileInput: document.getElementById('adsMusicFileInput'),
-  adsMusicStatusRow: document.getElementById('adsMusicStatusRow'),
-  adsMusicStatus: document.getElementById('adsMusicStatus'),
-  adsPlayBtn: document.getElementById('adsPlayBtn'),
-  adsFileInput: document.getElementById('adsFileInput'),
-  adsOverlay: document.getElementById('adsOverlay'),
-  adsMediaContainer: document.getElementById('adsMediaContainer'),
-  finalOverlay: document.getElementById('finalOverlay'),
-  finalConfetti: document.getElementById('finalConfetti'),
-  finalLightning: document.getElementById('finalLightning'),
-  finalFlash: document.getElementById('finalFlash'),
-  finalTeamName: document.getElementById('finalTeamName'),
-  swapOverlay: document.getElementById('swapOverlay'),
+  setsA: document.getElementById('setsA'),
+  setsB: document.getElementById('setsB'),
+  setHistory: document.getElementById('setHistory'),
+  sponsors: document.getElementById('sponsors'),
+  controls: document.getElementById('controls'),
+  ctrlTab: document.getElementById('ctrlTab'),
+  fileInput: document.getElementById('fileInput'),
+  stage: document.getElementById('stage'),
 };
 
-let state = {
-  nameA: 'KEMALA 2', nameB: 'MEN I',
-  scoreA: 0, scoreB: 0, setsA: 0, setsB: 0,
-  theme: 'dark', nameSize: 64, scoreSize: 260, showBadges: false,
-  animA: 'lightning', animB: 'lightning',
-  compactMode: false,
-  useCustomColors: false, colorName: '#ffffff', colorScore: '#f5e40a', colorBg: '#1c1c1c',
-  panelAlpha: 100,
-  finalScore: 25,
-  matchEnded: false,
-};
-
-let adsObjectUrl = null;
-let adsType = null;
+let editMode = false;
 
 function render(){
   el.nameA.textContent = state.nameA;
   el.nameB.textContent = state.nameB;
-  el.scoreA.textContent = state.scoreA;
-  el.scoreB.textContent = state.scoreB;
-  el.setsAVal.textContent = state.setsA;
-  el.setsBVal.textContent = state.setsB;
-  el.body.setAttribute('data-theme', state.theme);
-  el.root.style.setProperty('--name-size', state.nameSize + 'px');
-  el.root.style.setProperty('--score-size', state.scoreSize + 'px');
-  el.root.style.setProperty('--panel-alpha', (state.panelAlpha/100));
-  el.nameSize.value = state.nameSize;
-  el.scoreSize.value = state.scoreSize;
-  el.panelAlpha.value = state.panelAlpha;
+  el.scoreA.querySelector('.side-score').textContent = state.scoreA;
+  el.scoreB.querySelector('.side-score').textContent = state.scoreB;
+  el.scoreA.classList.toggle('scored', state.lastScorer === 'A');
+  el.scoreB.classList.toggle('scored', state.lastScorer === 'B');
+  el.setsA.childNodes[0].nodeValue = state.setsA;
+  el.setsB.childNodes[0].nodeValue = state.setsB;
 
-  if(state.useCustomColors){
-    el.root.style.setProperty('--text', state.colorName);
-    el.root.style.setProperty('--score', state.colorScore);
-    el.root.style.setProperty('--bg', state.colorBg);
-    el.body.style.backgroundColor = state.colorBg;
-  } else {
-    el.root.style.removeProperty('--text');
-    el.root.style.removeProperty('--score');
-    el.root.style.removeProperty('--bg');
-    el.body.style.backgroundColor = '';
+  el.crestA.innerHTML = state.crestA ? '<img src="'+state.crestA+'">' : '🛡️';
+  el.crestB.innerHTML = state.crestB ? '<img src="'+state.crestB+'">' : '🏐';
+
+  renderSponsors();
+  renderAds();
+
+  document.querySelectorAll('.stat-row').forEach(row=>{
+    const stat = row.dataset.stat;
+    const nums = row.querySelectorAll('.stat-num');
+    nums[0].childNodes[0].nodeValue = state[stat+'A'];
+    nums[1].childNodes[0].nodeValue = state[stat+'B'];
+  });
+
+  el.setHistory.innerHTML = '';
+  for(let i=0;i<NUM_SETS;i++){
+    const box = document.createElement('div');
+    box.className = 'set-box';
+    box.innerHTML = '<div class="set-box-head">SET '+(i+1)+'</div><div class="set-box-body" contenteditable spellcheck="false" data-idx="'+i+'">'+(state.sets[i]||'')+'</div>';
+    el.setHistory.appendChild(box);
   }
-  el.useCustomColors.checked = state.useCustomColors;
-  el.colorName.value = state.colorName;
-  el.colorScore.value = state.colorScore;
-  el.colorBg.value = state.colorBg;
-
-  el.themeMenu.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b.dataset.themeValue === state.theme));
-  el.animAMenu.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b.dataset.animValue === state.animA));
-  el.animBMenu.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b.dataset.animValue === state.animB));
-  el.badgesRows.forEach(r=> r.classList.toggle('hidden', !state.showBadges));
-  el.toggleBadges.textContent = state.showBadges ? 'Sembunyikan Set' : 'Tampilkan Set';
-  el.finalScoreInput.value = state.finalScore;
-
-  document.querySelectorAll('#mainControls > *, #sizeControls > *').forEach(node=>{
-    node.style.display = state.compactMode ? 'none' : '';
+  document.querySelectorAll('.set-box-body').forEach(b=>{
+    b.addEventListener('input', ()=>{ state.sets[b.dataset.idx] = b.textContent; save(); });
   });
-  el.toggleMenu.classList.toggle('active', state.compactMode);
+
+  fitAllTeamNames();
+  syncNumWidths();
 }
 
-/* ===== Penyimpanan otomatis ===== */
-const hasCloudStorage = typeof window.storage !== 'undefined' && window.storage;
-
-async function save(){
-  const json = JSON.stringify(state);
-  if(hasCloudStorage){
-    try{
-      const result = await window.storage.set(STORAGE_KEY, json, false);
-      if(!result) showStatus('Gagal menyimpan');
-      return;
-    }catch(e){ console.error('Storage error:', e); }
+function renderSponsors(){
+  el.sponsors.classList.toggle('clean', !editMode);
+  el.sponsors.innerHTML = '';
+  state.sponsors.forEach((src, i)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'sponsor-logo';
+    wrap.innerHTML = '<img src="'+src+'">' + (editMode ? '<div class="sponsor-remove" data-idx="'+i+'">×</div>' : '');
+    wrap.addEventListener('click', (e)=>{
+      if(e.target.classList.contains('sponsor-remove')){
+        e.stopPropagation();
+        state.sponsors.splice(Number(e.target.dataset.idx),1);
+        render(); save();
+        return;
+      }
+      if(editMode){ uploadTarget = 'sponsor:'+i; el.fileInput.click(); }
+    });
+    el.sponsors.appendChild(wrap);
+  });
+  if(editMode){
+    const add = document.createElement('div');
+    add.className = 'sponsor-add';
+    add.textContent = '+';
+    add.addEventListener('click', ()=>{ uploadTarget='sponsor:new'; el.fileInput.click(); });
+    el.sponsors.appendChild(add);
   }
-  try{ localStorage.setItem(STORAGE_KEY, json); }
-  catch(e){ console.error('localStorage error:', e); showStatus('Gagal menyimpan'); }
 }
 
-async function load(){
-  showStatus('Memuat...');
-  if(hasCloudStorage){
-    try{
-      const result = await window.storage.get(STORAGE_KEY, false);
-      if(result && result.value) state = Object.assign(state, JSON.parse(result.value));
-      render(); showStatus(''); await refreshSlotList(); return;
-    }catch(e){ /* belum ada data cloud */ }
+/* ---- shrink-to-fit team names (max 1 line) ---- */
+function fitTeamName(node){
+  node.style.fontSize = '';
+  let fontSize = parseFloat(getComputedStyle(node).fontSize);
+  const minSize = 10;
+  let guard = 0;
+  while(node.scrollWidth > node.clientWidth && fontSize > minSize && guard < 200){
+    fontSize -= 1;
+    node.style.fontSize = fontSize + 'px';
+    guard++;
   }
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) state = Object.assign(state, JSON.parse(raw));
-  }catch(e){ /* default */ }
-  render(); showStatus('');
-  await refreshSlotList();
 }
-
-let statusTimer;
-function showStatus(msg){
-  el.status.textContent = msg;
-  if(msg){ clearTimeout(statusTimer); statusTimer = setTimeout(()=>{ el.status.textContent=''; }, 1400); }
+function fitAllTeamNames(){
+  requestAnimationFrame(()=>{ fitTeamName(el.nameA); fitTeamName(el.nameB); });
 }
-
-/* ===== Undo / Redo ===== */
-let undoStack = [], redoStack = [];
-function snapshotFields(){
-  return JSON.stringify({
-    nameA:state.nameA, nameB:state.nameB, scoreA:state.scoreA, scoreB:state.scoreB,
-    setsA:state.setsA, setsB:state.setsB
-  });
-}
-function pushHistory(){
-  undoStack.push(snapshotFields());
-  if(undoStack.length > 50) undoStack.shift();
-  redoStack = [];
-}
-el.undoBtn.addEventListener('click', ()=>{
-  if(undoStack.length === 0) return;
-  redoStack.push(snapshotFields());
-  Object.assign(state, JSON.parse(undoStack.pop()));
-  render(); save();
-});
-el.redoBtn.addEventListener('click', ()=>{
-  if(redoStack.length === 0) return;
-  undoStack.push(snapshotFields());
-  Object.assign(state, JSON.parse(redoStack.pop()));
-  render(); save();
+let resizeTimer=null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{ fitAllTeamNames(); syncNumWidths(); }, 120);
 });
 
-/* ===== Intensitas animasi berdasar selisih skor ===== */
-function computeIntensity(teamKey){
-  const my = teamKey === 'A' ? state.scoreA : state.scoreB;
-  const opp = teamKey === 'A' ? state.scoreB : state.scoreA;
-  if(my <= opp) return 1;
-  return Math.min(5, my - opp);
-}
-function applyIntensity(wrap, intensity){
-  wrap.style.setProperty('--intensity-scale', (1 + (intensity-1)*0.09).toFixed(3));
-  wrap.querySelectorAll('[data-level]').forEach(node=>{
-    node.style.display = Number(node.dataset.level) <= intensity ? '' : 'none';
+/* ---- sets / VC / T-O / SUB numbers share the width of the widest one ---- */
+function syncNumWidths(){
+  const nodes = document.querySelectorAll('.sets-box, .stat-num');
+  if(!nodes.length) return;
+  requestAnimationFrame(()=>{
+    nodes.forEach(n=>{ n.style.minWidth = ''; });
+    let max = 0;
+    nodes.forEach(n=>{ max = Math.max(max, n.getBoundingClientRect().width); });
+    nodes.forEach(n=>{ n.style.minWidth = max + 'px'; });
   });
 }
 
-/* ===== Kilatan tepi (dipakai semua jenis animasi, seperti pada Petir) ===== */
-const RAINBOW_COLORS = ['#ff5e78','#ffd23f','#6bffb8','#5ec8ff','#b98bff','#ff9f5e','#5eff9f','#ff5ec8','#5e9fff','#f5ff5e'];
-function edgeFlash(teamKey, color){
-  const teamEl = teamKey === 'A' ? el.teamA : el.teamB;
-  const flash = teamKey === 'A' ? el.flashA : el.flashB;
-  teamEl.style.setProperty('--edge-glow-color', color);
-  flash.style.setProperty('--flash-color', color);
-  teamEl.classList.remove('edge-flash');
-  flash.classList.remove('flash');
-  void teamEl.offsetWidth;
-  teamEl.classList.add('edge-flash');
-  flash.classList.add('flash');
-  setTimeout(()=>{ flash.classList.remove('flash'); }, 650);
-  setTimeout(()=>{ teamEl.classList.remove('edge-flash'); }, 1150);
-}
-
-/* ===== Pemicu animasi skor ===== */
-function strikeLightning(teamKey, intensity){
-  const teamEl = teamKey === 'A' ? el.teamA : el.teamB;
-  const boltWrap = teamKey === 'A' ? el.boltWrapA : el.boltWrapB;
-  const flash = teamKey === 'A' ? el.flashA : el.flashB;
-  applyIntensity(boltWrap, intensity);
-  flash.style.setProperty('--flash-color', '#ffffff');
-  teamEl.classList.remove('flashing', 'aftermath');
-  boltWrap.classList.remove('strike', 'aftermath');
-  flash.classList.remove('flash');
-  void boltWrap.offsetWidth;
-  teamEl.classList.add('flashing');
-  boltWrap.classList.add('strike', 'aftermath');
-  teamEl.classList.add('aftermath');
-  flash.classList.add('flash');
-  setTimeout(()=>{ teamEl.classList.remove('flashing'); }, 160);
-  setTimeout(()=>{ boltWrap.classList.remove('strike'); flash.classList.remove('flash'); }, 650);
-  setTimeout(()=>{ boltWrap.classList.remove('aftermath'); teamEl.classList.remove('aftermath'); }, 1600);
-}
-function strikeHearts(teamKey, intensity){
-  const wrap = teamKey === 'A' ? el.heartsWrapA : el.heartsWrapB;
-  applyIntensity(wrap, intensity);
-  wrap.classList.remove('blow');
-  const particles = wrap.querySelectorAll('.heart-particle');
-  particles.forEach(h=>{ h.style.animation = 'none'; });
-  void wrap.offsetWidth;
-  const dirKeys = ['L','R','C'];
-  particles.forEach((h)=>{
-    if(h.style.display === 'none') return;
-    /* posisi acak menyebar di sekitar area skor */
-    h.style.left = (2 + Math.random()*96) + '%';
-    h.style.bottom = (Math.random()*70) + '%';
-    const dir = dirKeys[Math.floor(Math.random()*dirKeys.length)];
-    const anim = dir === 'L' ? 'heartFloatL' : dir === 'R' ? 'heartFloatR' : 'heartFloatC';
-    const delay = (Math.random()*0.45).toFixed(3);
-    h.style.animation = anim + ' 1.5s ease-out ' + delay + 's forwards';
+/* ---- editable team names ---- */
+[el.nameA, el.nameB].forEach(node=>{
+  node.addEventListener('input', ()=>{
+    if(node===el.nameA) state.nameA = node.textContent;
+    if(node===el.nameB) state.nameB = node.textContent;
+    fitTeamName(node);
+    save();
   });
-  wrap.classList.add('blow');
-  edgeFlash(teamKey, '#ff5e9e');
-  setTimeout(()=>{ wrap.classList.remove('blow'); }, 1900);
-}
-function strikeInk(teamKey, intensity){
-  const wrap = teamKey === 'A' ? el.inkWrapA : el.inkWrapB;
-  applyIntensity(wrap, intensity);
-  const dots = wrap.querySelectorAll('.ink-dot');
-  dots.forEach(d=>{ d.style.animation = 'none'; });
-  void wrap.offsetWidth;
-  dots.forEach((d)=>{
-    if(d.style.display === 'none') return;
-    /* posisi & warna pelangi acak menyebar di sekitar skor */
-    d.style.left = (2 + Math.random()*94) + '%';
-    d.style.top = (2 + Math.random()*94) + '%';
-    const size = 8 + Math.random()*14;
-    d.style.width = size + 'px';
-    d.style.height = size + 'px';
-    d.style.background = RAINBOW_COLORS[Math.floor(Math.random()*RAINBOW_COLORS.length)];
-    const delay = (Math.random()*0.35).toFixed(3);
-    d.style.animation = 'inkDotPop .9s cubic-bezier(.2,.85,.25,1) ' + delay + 's forwards';
-  });
-  edgeFlash(teamKey, RAINBOW_COLORS[Math.floor(Math.random()*RAINBOW_COLORS.length)]);
-}
-function playAnim(teamKey){
-  const type = teamKey === 'A' ? state.animA : state.animB;
-  const intensity = computeIntensity(teamKey);
-  if(type === 'lightning') strikeLightning(teamKey, intensity);
-  else if(type === 'hearts') strikeHearts(teamKey, intensity);
-  else if(type === 'ink') strikeInk(teamKey, intensity);
-}
-
-/* ===== Skor ===== */
-function addScore(teamKey, delta){
-  pushHistory();
-  const key = teamKey === 'A' ? 'scoreA' : 'scoreB';
-  state[key] = Math.max(0, (state[key]||0) + delta);
-  if(delta > 0) playAnim(teamKey);
-  render();
-  save();
-  checkMatchEnd();
-}
-
-function bindScoreTap(teamEl, teamKey){
-  teamEl.addEventListener('click', (e)=>{
-    if(e.target.closest('.team-name') || e.target.closest('.badge')) return;
-    addScore(teamKey, 1);
-  });
-  teamEl.addEventListener('contextmenu', (e)=>{
-    if(e.target.closest('.team-name') || e.target.closest('.badge')) return;
-    e.preventDefault();
-    addScore(teamKey, -1);
-  });
-}
-bindScoreTap(el.teamA, 'A');
-bindScoreTap(el.teamB, 'B');
-
-document.querySelectorAll('.badge-btn').forEach(btn=>{
-  btn.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    pushHistory();
-    const key = btn.dataset.adjust;
-    const dir = Number(btn.dataset.dir);
-    state[key] = Math.max(0, (state[key]||0) + dir);
-    render(); save();
+  /* When the name is deleted entirely, contenteditable can leave behind a
+     stray <br> so the element never truly registers as empty, which used
+     to make it collapse and become unclickable. Normalize on blur so the
+     placeholder shows and the field stays clickable to type into again. */
+  node.addEventListener('blur', ()=>{
+    if(!node.textContent.trim()){
+      node.innerHTML = '';
+      if(node===el.nameA) state.nameA = '';
+      if(node===el.nameB) state.nameB = '';
+      save();
+    }
   });
 });
 
-/* ===== Zona cepat ===== */
-el.lazyZone.addEventListener('click', ()=> addScore('A', 1));
-el.lazyZone.addEventListener('contextmenu', (e)=>{ e.preventDefault(); addScore('B', 1); });
-el.lazyZone.addEventListener('wheel', (e)=>{
-  e.preventDefault();
-  if(e.deltaY < 0) addScore('A', -1);
-  else if(e.deltaY > 0) addScore('B', -1);
-}, { passive:false });
-
-/* ===== Nama tim ===== */
-el.nameA.addEventListener('input', ()=>{ state.nameA = el.nameA.textContent.trim() || 'TIM A'; });
-el.nameB.addEventListener('input', ()=>{ state.nameB = el.nameB.textContent.trim() || 'TIM B'; });
-el.nameA.addEventListener('blur', ()=>{ render(); save(); });
-el.nameB.addEventListener('blur', ()=>{ render(); save(); });
-[el.nameA, el.nameB].forEach(n=>{
-  n.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); n.blur(); } });
-});
-
-let swapTimers = [];
-function performSwap(){
-  pushHistory();
-  [state.nameA, state.nameB] = [state.nameB, state.nameA];
-  [state.scoreA, state.scoreB] = [state.scoreB, state.scoreA];
-  [state.setsA, state.setsB] = [state.setsB, state.setsA];
-  [state.animA, state.animB] = [state.animB, state.animA];
+/* ---- score adjust (manual — no automatic set-end detection) ---- */
+function adjustScore(team, delta){
+  const key = 'score'+team;
+  state[key] = Math.max(0, state[key]+delta);
+  if(delta > 0) state.lastScorer = team;
   render(); save();
 }
-function triggerSwapAnimation(){
-  swapTimers.forEach(t=> clearTimeout(t));
-  swapTimers = [];
-  el.swapOverlay.classList.remove('active');
-  void el.swapOverlay.offsetWidth;
-  el.swapOverlay.classList.add('active');
-  /* skor & data tim ditukar saat popup berhenti sejenak di tengah (mudah dibaca), sebelum melesat pergi */
-  swapTimers.push(setTimeout(performSwap, 950));
-  swapTimers.push(setTimeout(()=>{ el.swapOverlay.classList.remove('active'); }, 2000));
-}
-document.getElementById('swap').addEventListener('click', triggerSwapAnimation);
-
-document.getElementById('resetScore').addEventListener('click', ()=>{
-  pushHistory();
-  state.scoreA = 0; state.scoreB = 0; state.setsA = 0; state.setsB = 0;
-  state.matchEnded = false;
-  closeFinalOverlay();
+/* Manual set-end: keeps the score visible until the operator ends the set on
+   purpose, then swaps it into the set-history box automatically. */
+function endCurrentSet(){
+  const emptyIdx = state.sets.findIndex(s=>!s);
+  const idx = emptyIdx === -1 ? NUM_SETS-1 : emptyIdx;
+  state.sets[idx] = state.scoreA + '-' + state.scoreB;
+  if(state.scoreA > state.scoreB) state.setsA++; else if(state.scoreB > state.scoreA) state.setsB++;
+  state.scoreA = 0; state.scoreB = 0;
+  state.vcA=0; state.vcB=0; state.toA=0; state.toB=0; state.subA=0; state.subB=0;
+  state.lastScorer = null;
   render(); save();
-});
+}
 
-document.getElementById('resetAll').addEventListener('click', ()=>{
-  pushHistory();
-  state = {
-    nameA:'TIM A', nameB:'TIM B', scoreA:0, scoreB:0, setsA:0, setsB:0,
-    theme: state.theme, nameSize: state.nameSize, scoreSize: state.scoreSize, showBadges: state.showBadges,
-    animA: state.animA, animB: state.animB, compactMode: state.compactMode,
-    useCustomColors: state.useCustomColors, colorName: state.colorName, colorScore: state.colorScore, colorBg: state.colorBg,
-    panelAlpha: state.panelAlpha, finalScore: state.finalScore, matchEnded: false,
+/* ---- generic press-and-hold(=decrement) / tap(=increment) binder ----
+   Tap-to-add works always. Hold/right-click-to-remove and the floating
+   "−" button are edit-mode only. ---- */
+function bindCounter(node, getVal, setVal, opts){
+  opts = opts || {};
+  let timer=null, held=false;
+  const start = ()=>{
+    held=false;
+    if(!editMode) return;
+    timer = setTimeout(()=>{ held=true; setVal(Math.max(0, getVal()-1)); if(opts.afterDec) opts.afterDec(); render(); save(); }, 550);
   };
-  closeFinalOverlay();
-  render(); save();
-});
-
-/* ===== Sembunyikan menu ===== */
-el.toggleMenu.addEventListener('click', ()=>{
-  state.compactMode = !state.compactMode;
-  render(); save();
-});
-
-/* ===== Menu dropdown umum ===== */
-function bindDropdown(toggleEl, menuEl){
-  toggleEl.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    const isOpen = menuEl.classList.contains('open');
-    document.querySelectorAll('.theme-menu.open').forEach(m=> m.classList.remove('open'));
-    if(!isOpen) menuEl.classList.add('open');
+  const end = ()=>{
+    clearTimeout(timer);
+    if(!held){ setVal(getVal()+1); if(opts.afterInc) opts.afterInc(); render(); save(); }
+  };
+  const cancel = ()=> clearTimeout(timer);
+  node.addEventListener('mousedown', start);
+  node.addEventListener('mouseup', end);
+  node.addEventListener('mouseleave', cancel);
+  node.addEventListener('touchstart', start, {passive:true});
+  node.addEventListener('touchend', (e)=>{ e.preventDefault(); end(); });
+  /* Right-click always decrements, in or out of edit mode. */
+  node.addEventListener('contextmenu', (e)=>{
+    e.preventDefault();
+    setVal(Math.max(0,getVal()-1)); if(opts.afterDec) opts.afterDec(); render(); save();
   });
 }
-bindDropdown(el.themeToggle, el.themeMenu);
-bindDropdown(el.animAToggle, el.animAMenu);
-bindDropdown(el.animBToggle, el.animBMenu);
-bindDropdown(el.colorToggle, el.colorMenu);
-bindDropdown(el.saveMenuToggle, el.saveMenu);
-bindDropdown(el.settingsToggle, el.settingsMenu);
-bindDropdown(el.adsToggle, el.adsMenu);
-[el.colorMenu, el.saveMenu, el.settingsMenu, el.adsMenu].forEach(m=>{
-  m.addEventListener('click', (e)=> e.stopPropagation());
-});
-
-el.themeMenu.querySelectorAll('button').forEach(btn=>{
+function addMinusBtn(parent, onClick){
+  const btn = document.createElement('div');
+  btn.className = 'float-minus';
+  btn.textContent = '−';
+  const stop = (e)=> e.stopPropagation();
+  btn.addEventListener('mousedown', stop);
+  btn.addEventListener('mouseup', stop);
+  btn.addEventListener('touchstart', stop, {passive:true});
+  btn.addEventListener('touchend', stop);
   btn.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    state.theme = btn.dataset.themeValue;
-    render(); save();
-    el.themeMenu.classList.remove('open');
+    e.stopPropagation(); e.preventDefault();
+    if(!editMode) return;
+    onClick();
   });
-});
-el.animAMenu.querySelectorAll('button').forEach(btn=>{
-  btn.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    state.animA = btn.dataset.animValue;
-    render(); save();
-    el.animAMenu.classList.remove('open');
-  });
-});
-el.animBMenu.querySelectorAll('button').forEach(btn=>{
-  btn.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    state.animB = btn.dataset.animValue;
-    render(); save();
-    el.animBMenu.classList.remove('open');
-  });
-});
-document.addEventListener('click', ()=>{
-  document.querySelectorAll('.theme-menu.open').forEach(m=> m.classList.remove('open'));
+  parent.appendChild(btn);
+}
+
+bindCounter(el.scoreA, ()=>state.scoreA, v=>state.scoreA=v, { afterInc:()=>{ state.lastScorer='A'; } });
+bindCounter(el.scoreB, ()=>state.scoreB, v=>state.scoreB=v, { afterInc:()=>{ state.lastScorer='B'; } });
+addMinusBtn(el.scoreA, ()=>adjustScore('A',-1));
+addMinusBtn(el.scoreB, ()=>adjustScore('B',-1));
+
+bindCounter(el.setsA, ()=>state.setsA, v=>state.setsA=v);
+bindCounter(el.setsB, ()=>state.setsB, v=>state.setsB=v);
+addMinusBtn(el.setsA, ()=>{ state.setsA=Math.max(0,state.setsA-1); render(); save(); });
+addMinusBtn(el.setsB, ()=>{ state.setsB=Math.max(0,state.setsB-1); render(); save(); });
+
+document.querySelectorAll('.stat-row').forEach(row=>{
+  const stat = row.dataset.stat;
+  const nums = row.querySelectorAll('.stat-num');
+  bindCounter(nums[0], ()=>state[stat+'A'], v=>state[stat+'A']=v);
+  bindCounter(nums[1], ()=>state[stat+'B'], v=>state[stat+'B']=v);
+  addMinusBtn(nums[0], ()=>{ state[stat+'A']=Math.max(0,state[stat+'A']-1); render(); save(); });
+  addMinusBtn(nums[1], ()=>{ state[stat+'B']=Math.max(0,state[stat+'B']-1); render(); save(); });
 });
 
-/* ===== Ukuran font ===== */
-el.nameSize.addEventListener('input', ()=>{
-  state.nameSize = Number(el.nameSize.value);
-  el.root.style.setProperty('--name-size', state.nameSize + 'px');
-});
-el.nameSize.addEventListener('change', save);
-el.scoreSize.addEventListener('input', ()=>{
-  state.scoreSize = Number(el.scoreSize.value);
-  el.root.style.setProperty('--score-size', state.scoreSize + 'px');
-});
-el.scoreSize.addEventListener('change', save);
+/* ---- crest & sponsor logo upload ---- */
+let uploadTarget = null;
+el.crestA.addEventListener('click', ()=>{ uploadTarget='crestA'; el.fileInput.click(); });
+el.crestB.addEventListener('click', ()=>{ uploadTarget='crestB'; el.fileInput.click(); });
 
-el.toggleBadges.addEventListener('click', ()=>{
-  state.showBadges = !state.showBadges;
-  render(); save();
-});
-
-/* ===== Warna kustom & latar ===== */
-el.useCustomColors.addEventListener('change', ()=>{ state.useCustomColors = el.useCustomColors.checked; render(); save(); });
-el.colorName.addEventListener('input', ()=>{ state.colorName = el.colorName.value; if(state.useCustomColors) render(); });
-el.colorName.addEventListener('change', save);
-el.colorScore.addEventListener('input', ()=>{ state.colorScore = el.colorScore.value; if(state.useCustomColors) render(); });
-el.colorScore.addEventListener('change', save);
-el.colorBg.addEventListener('input', ()=>{ state.colorBg = el.colorBg.value; if(state.useCustomColors) render(); });
-el.colorBg.addEventListener('change', save);
-el.panelAlpha.addEventListener('input', ()=>{
-  state.panelAlpha = Number(el.panelAlpha.value);
-  el.root.style.setProperty('--panel-alpha', state.panelAlpha/100);
-});
-el.panelAlpha.addEventListener('change', save);
-
-el.bgUploadBtn.addEventListener('click', ()=> el.bgFileInput.click());
-el.bgFileInput.addEventListener('change', (e)=>{
+el.fileInput.addEventListener('change', (e)=>{
   const file = e.target.files[0];
-  if(!file) return;
+  if(!file || !uploadTarget) return;
   const reader = new FileReader();
   reader.onload = ()=>{
-    el.body.style.backgroundImage = 'url(' + reader.result + ')';
-    showStatus('Gambar latar diterapkan');
+    if(uploadTarget === 'bgImage'){
+      state.bgImage = reader.result;
+      applyBackground(); save();
+    } else if(uploadTarget.startsWith('sponsor:')){
+      const part = uploadTarget.split(':')[1];
+      if(part === 'new'){ state.sponsors.push(reader.result); }
+      else { state.sponsors[Number(part)] = reader.result; }
+      render(); save();
+    } else {
+      state[uploadTarget] = reader.result;
+      render(); save();
+    }
   };
-  reader.onerror = ()=> showStatus('Gagal memuat gambar');
   reader.readAsDataURL(file);
   e.target.value = '';
 });
-el.bgRemoveBtn.addEventListener('click', ()=>{
-  el.body.style.backgroundImage = '';
-  showStatus('Gambar latar dihapus');
-});
 
-/* ===== Simpan/Muat (slot penyimpanan internal) ===== */
-async function slotStorageList(){
-  if(hasCloudStorage){
-    try{
-      const result = await window.storage.list(SLOT_PREFIX, false);
-      return result && result.keys ? result.keys : [];
-    }catch(e){ return []; }
-  }
-  try{
-    return Object.keys(localStorage).filter(k=> k.startsWith(SLOT_PREFIX));
-  }catch(e){ return []; }
-}
-async function slotStorageGet(keyName){
-  if(hasCloudStorage){
-    try{
-      const result = await window.storage.get(keyName, false);
-      return result ? result.value : null;
-    }catch(e){ return null; }
-  }
-  try{ return localStorage.getItem(keyName); }catch(e){ return null; }
-}
-async function slotStorageSet(keyName, value){
-  if(hasCloudStorage){
-    try{ await window.storage.set(keyName, value, false); return; }catch(e){ /* fallback */ }
-  }
-  try{ localStorage.setItem(keyName, value); }catch(e){ /* ignore */ }
-}
-async function slotStorageDelete(keyName){
-  if(hasCloudStorage){
-    try{ await window.storage.delete(keyName, false); return; }catch(e){ /* fallback */ }
-  }
-  try{ localStorage.removeItem(keyName); }catch(e){ /* ignore */ }
-}
-
-async function refreshSlotList(){
-  const keys = await slotStorageList();
-  el.slotList.innerHTML = '';
-  if(keys.length === 0){
-    el.slotList.innerHTML = '<div style="opacity:.6; padding:6px 0;">Belum ada slot tersimpan</div>';
-    return;
-  }
-  keys.forEach(k=>{
-    const name = k.startsWith(SLOT_PREFIX) ? k.slice(SLOT_PREFIX.length) : k;
-    const row = document.createElement('div');
-    row.className = 'slot-item';
-    const label = document.createElement('span');
-    label.textContent = name;
-    const actions = document.createElement('div');
-    actions.className = 'slot-actions';
-    const loadBtn = document.createElement('button');
-    loadBtn.className = 'mini-btn'; loadBtn.type = 'button'; loadBtn.textContent = 'Muat';
-    loadBtn.addEventListener('click', async ()=>{
-      const raw = await slotStorageGet(k);
-      if(raw){
-        try{
-          pushHistory();
-          state = Object.assign(state, JSON.parse(raw));
-          render(); save();
-          showStatus('Slot dimuat: ' + name);
-        }catch(e){ showStatus('Slot rusak'); }
-      }
-    });
-    const delBtn = document.createElement('button');
-    delBtn.className = 'mini-btn'; delBtn.type = 'button'; delBtn.textContent = 'Hapus';
-    delBtn.addEventListener('click', async ()=>{
-      await slotStorageDelete(k);
-      showStatus('Slot dihapus: ' + name);
-      refreshSlotList();
-    });
-    actions.appendChild(loadBtn);
-    actions.appendChild(delBtn);
-    row.appendChild(label);
-    row.appendChild(actions);
-    el.slotList.appendChild(row);
-  });
-}
-
-el.slotSaveBtn.addEventListener('click', async ()=>{
-  const name = el.slotName.value.trim();
-  if(!name){ showStatus('Nama slot kosong'); return; }
-  await slotStorageSet(SLOT_PREFIX + name, JSON.stringify(state));
-  showStatus('Tersimpan ke slot: ' + name);
-  el.slotName.value = '';
-  refreshSlotList();
-});
-
-/* ===== Pengaturan skor akhir ===== */
-el.finalScoreInput.addEventListener('change', ()=>{
-  const v = Math.max(1, Number(el.finalScoreInput.value) || 25);
-  state.finalScore = v;
-  state.matchEnded = false;
-  save();
-});
-
-/* ===== Deteksi akhir pertandingan (dengan aturan deuce) ===== */
-function checkMatchEnd(){
-  if(state.matchEnded) return;
-  const target = state.finalScore;
-  const leadScore = Math.max(state.scoreA, state.scoreB);
-  const trailScore = Math.min(state.scoreA, state.scoreB);
-  if(leadScore >= target && (leadScore - trailScore) >= 2){
-    const teamKey = state.scoreA >= state.scoreB ? 'A' : 'B';
-    triggerFinalAnimation(teamKey);
-  }
-}
-
-/* ===== Animasi kemenangan berulang tanpa henti (sama gayanya untuk semua jenis) ===== */
-let winLoopTimer = null;
-
-function spawnThunderBolt(){
-  const wrap = document.createElement('div');
-  wrap.className = 'lightning-wrap strike';
-  wrap.style.setProperty('--x', (6 + Math.random()*88) + '%');
-  wrap.innerHTML = '<svg viewBox="0 0 200 380" preserveAspectRatio="none">'
-    + '<path class="bolt-glow" pathLength="1" d="M100,0 L82,58 L118,64 L72,128 L122,134 L66,200 L128,206 L88,268 L112,274 L98,340"/>'
-    + '<path class="bolt-core" pathLength="1" d="M100,0 L82,58 L118,64 L72,128 L122,134 L66,200 L128,206 L88,268 L112,274 L98,340"/>'
-    + '</svg>';
-  el.finalLightning.appendChild(wrap);
-  el.finalFlash.classList.remove('flash');
-  void el.finalFlash.offsetWidth;
-  el.finalFlash.classList.add('flash');
-  setTimeout(()=>{ wrap.remove(); }, 900);
-}
-function spawnHeartBurst(){
-  const hearts = ['💗','💕','💖','💘'];
-  const count = 3 + Math.floor(Math.random()*3);
-  for(let i=0; i<count; i++){
-    const h = document.createElement('span');
-    h.className = 'final-burst-item final-heart';
-    h.textContent = hearts[Math.floor(Math.random()*hearts.length)];
-    h.style.left = (5 + Math.random()*88) + '%';
-    h.style.top = (10 + Math.random()*72) + '%';
-    const dur = (1.1 + Math.random()*.5).toFixed(2);
-    h.style.animation = 'winBurstPop ' + dur + 's ease-out forwards';
-    el.finalConfetti.appendChild(h);
-    setTimeout(()=>{ h.remove(); }, dur*1000 + 100);
-  }
-}
-function spawnInkBurst(){
-  const count = 4 + Math.floor(Math.random()*5);
-  for(let i=0; i<count; i++){
-    const d = document.createElement('span');
-    d.className = 'final-burst-item final-dot';
-    d.style.left = (5 + Math.random()*88) + '%';
-    d.style.top = (10 + Math.random()*72) + '%';
-    const size = 10 + Math.random()*14;
-    d.style.width = size + 'px';
-    d.style.height = size + 'px';
-    d.style.background = RAINBOW_COLORS[Math.floor(Math.random()*RAINBOW_COLORS.length)];
-    const dur = (0.9 + Math.random()*.5).toFixed(2);
-    d.style.animation = 'winBurstPop ' + dur + 's ease-out forwards';
-    el.finalConfetti.appendChild(d);
-    setTimeout(()=>{ d.remove(); }, dur*1000 + 100);
-  }
-}
-function spawnSparkleBurst(){
-  const sparkles = ['✨','🎊'];
-  const count = 3 + Math.floor(Math.random()*3);
-  for(let i=0; i<count; i++){
-    const s = document.createElement('span');
-    s.className = 'final-burst-item final-heart';
-    s.textContent = sparkles[Math.floor(Math.random()*sparkles.length)];
-    s.style.left = (5 + Math.random()*88) + '%';
-    s.style.top = (10 + Math.random()*72) + '%';
-    const dur = (1 + Math.random()*.5).toFixed(2);
-    s.style.animation = 'winBurstPop ' + dur + 's ease-out forwards';
-    el.finalConfetti.appendChild(s);
-    setTimeout(()=>{ s.remove(); }, dur*1000 + 100);
-  }
-}
-function spawnWinBurst(type){
-  if(type === 'lightning') spawnThunderBolt();
-  else if(type === 'hearts') spawnHeartBurst();
-  else if(type === 'ink') spawnInkBurst();
-  else spawnSparkleBurst();
-}
-function scheduleNextWinBurst(type){
-  const delay = 250 + Math.random()*1300;
-  winLoopTimer = setTimeout(()=>{
-    spawnWinBurst(type);
-    scheduleNextWinBurst(type);
-  }, delay);
-}
-function startWinLoop(type){
-  stopWinLoop();
-  spawnWinBurst(type);
-  scheduleNextWinBurst(type);
-}
-function stopWinLoop(){
-  clearTimeout(winLoopTimer);
-  winLoopTimer = null;
-  el.finalLightning.innerHTML = '';
-  el.finalConfetti.innerHTML = '';
-  el.finalFlash.classList.remove('flash');
-}
-
-function triggerFinalAnimation(teamKey){
-  state.matchEnded = true;
-  save();
-  const name = teamKey === 'A' ? state.nameA : state.nameB;
-  const type = teamKey === 'A' ? state.animA : state.animB;
-  el.finalTeamName.textContent = name;
-  el.finalOverlay.classList.add('open');
-  startWinLoop(type);
-}
-function closeFinalOverlay(){
-  el.finalOverlay.classList.remove('open');
-  stopWinLoop();
-}
-/* Popup kemenangan hanya tertutup jika layar diklik di mana saja, tidak otomatis */
-el.finalOverlay.addEventListener('click', closeFinalOverlay);
-
-/* ===== Iklan ===== */
-el.adsUploadBtn.addEventListener('click', ()=> el.adsFileInput.click());
-el.adsFileInput.addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  if(adsObjectUrl) URL.revokeObjectURL(adsObjectUrl);
-  adsObjectUrl = URL.createObjectURL(file);
-  adsType = file.type.startsWith('video') ? 'video' : 'image';
-  showStatus('Media iklan siap diputar');
-  e.target.value = '';
-});
-
-/* ---- Musik latar iklan: antrean banyak file, fade in/out, lanjut dari posisi terakhir ---- */
-let musicFiles = [];
-let musicIndex = 0;
-let musicAudio = null;
-let musicFadeTimer = null;
-
-function ensureMusicAudio(){
-  if(!musicAudio){
-    musicAudio = new Audio();
-    musicAudio.addEventListener('ended', ()=>{
-      if(musicFiles.length === 0) return;
-      musicIndex = (musicIndex + 1) % musicFiles.length;
-      musicAudio.src = musicFiles[musicIndex];
-      musicAudio.currentTime = 0;
-      musicAudio.volume = 0;
-      musicAudio.play().catch(()=>{});
-      fadeAudio(musicAudio, 0, 1, 1200);
-    });
-  }
-  return musicAudio;
-}
-function fadeAudio(audio, from, to, duration, onDone){
-  clearInterval(musicFadeTimer);
-  const steps = 24;
-  const stepTime = duration / steps;
-  let count = 0;
-  audio.volume = from;
-  musicFadeTimer = setInterval(()=>{
-    count++;
-    const t = count / steps;
-    audio.volume = Math.max(0, Math.min(1, from + (to - from) * t));
-    if(count >= steps){
-      clearInterval(musicFadeTimer);
-      audio.volume = to;
-      if(onDone) onDone();
-    }
-  }, stepTime);
-}
-function startMusic(){
-  if(musicFiles.length === 0) return;
-  const audio = ensureMusicAudio();
-  if(!audio.src){
-    audio.src = musicFiles[musicIndex];
-    audio.currentTime = 0;
-  }
-  /* pemutaran dilanjutkan dari currentTime terakhir (tidak direset) */
-  audio.volume = 0;
-  audio.play().catch(()=>{});
-  fadeAudio(audio, 0, 1, 1300);
-}
-function stopMusic(){
-  if(!musicAudio) return;
-  fadeAudio(musicAudio, musicAudio.volume, 0, 900, ()=>{
-    musicAudio.pause();
-    /* currentTime sengaja tidak direset, agar lanjut dari detik terakhir saat diputar lagi */
-  });
-}
-el.adsMusicUploadBtn.addEventListener('click', ()=> el.adsMusicFileInput.click());
-el.adsMusicFileInput.addEventListener('change', (e)=>{
-  const files = Array.from(e.target.files || []);
-  if(files.length === 0) return;
-  musicFiles.forEach(u=> URL.revokeObjectURL(u));
-  musicFiles = files.map(f=> URL.createObjectURL(f));
-  musicIndex = 0;
-  if(musicAudio){
-    musicAudio.pause();
-    musicAudio.src = musicFiles[0];
-    musicAudio.currentTime = 0;
-  }
-  el.adsMusicStatusRow.style.display = '';
-  el.adsMusicStatus.textContent = files.length + ' file dalam antrean';
-  showStatus('Musik latar diunggah (' + files.length + ' file)');
-  e.target.value = '';
-});
-
-el.adsPlayBtn.addEventListener('click', ()=>{
-  if(!adsObjectUrl){ showStatus('Unggah media dulu'); return; }
-  el.adsMediaContainer.innerHTML = '';
-  if(adsType === 'video'){
-    const v = document.createElement('video');
-    v.src = adsObjectUrl; v.autoplay = true; v.loop = true; v.playsInline = true;
-    v.muted = !el.adsSoundToggle.checked;
-    v.addEventListener('contextmenu', (e)=> e.preventDefault());
-    el.adsMediaContainer.appendChild(v);
+/* ---- background ----
+   Color and image now combine instead of being mutually exclusive: the color
+   is always applied as backgroundColor, and if an image is also set it draws
+   on top — so a transparent PNG lets the chosen color show through it.
+   FIX: when a custom bgColor is chosen (and there's no image) we must
+   explicitly clear the background-image to 'none' — setting it to '' only
+   removes the inline override and falls back to the CSS gradient, which
+   visually hides the solid color underneath it. */
+function applyBackground(){
+  el.stage.style.backgroundColor = state.bgColor || '';
+  if(state.bgImage){
+    el.stage.style.backgroundImage = 'url(' + state.bgImage + ')';
+    el.stage.style.backgroundSize = 'cover';
+    el.stage.style.backgroundPosition = 'center';
+  } else if(state.bgColor){
+    el.stage.style.backgroundImage = 'none';
   } else {
-    const img = document.createElement('img');
-    img.src = adsObjectUrl;
-    img.addEventListener('contextmenu', (e)=> e.preventDefault());
-    el.adsMediaContainer.appendChild(img);
+    el.stage.style.backgroundImage = '';
   }
-  el.adsOverlay.classList.add('open');
-  startMusic();
+}
+document.getElementById('bgColorInput').addEventListener('input', (e)=>{
+  state.bgColor = e.target.value;
+  applyBackground(); save();
 });
-el.adsOverlay.addEventListener('contextmenu', (e)=> e.preventDefault());
-el.adsOverlay.addEventListener('click', ()=>{
-  const v = el.adsMediaContainer.querySelector('video');
-  if(v) v.pause();
-  el.adsMediaContainer.innerHTML = '';
-  el.adsOverlay.classList.remove('open');
-  stopMusic();
+document.getElementById('bgImageBtn').addEventListener('click', ()=>{ uploadTarget='bgImage'; el.fileInput.click(); });
+document.getElementById('bgResetBtn').addEventListener('click', ()=>{
+  state.bgColor = null; state.bgImage = null; applyBackground(); save();
 });
 
-/* ===== Panduan ===== */
-el.guideBtn.addEventListener('click', (e)=>{ e.stopPropagation(); el.guideOverlay.classList.add('open'); });
-el.guideClose.addEventListener('click', ()=> el.guideOverlay.classList.remove('open'));
-el.guideOverlay.addEventListener('click', (e)=>{ if(e.target === el.guideOverlay) el.guideOverlay.classList.remove('open'); });
+/* ---- score size setting ---- */
+document.getElementById('scoreSizeInput').addEventListener('input', (e)=>{
+  state.scoreScale = Number(e.target.value)/100;
+  document.documentElement.style.setProperty('--score-scale', state.scoreScale);
+  save();
+});
 
-/* ===== Kontrol keyboard ===== */
-document.addEventListener('keydown', (e)=>{
-  const active = document.activeElement;
-  if(active && (active.isContentEditable || ['INPUT','TEXTAREA','SELECT'].includes(active.tagName))) return;
-  if(el.guideOverlay.classList.contains('open')){
-    if(e.key === 'Escape') el.guideOverlay.classList.remove('open');
+/* ---- club logo (crest) size setting ---- */
+document.getElementById('crestSizeInput').addEventListener('input', (e)=>{
+  state.crestScale = Number(e.target.value)/100;
+  document.documentElement.style.setProperty('--crest-scale', state.crestScale);
+  save();
+});
+
+/* ---- score font / color / outline ---- */
+function applyScoreStyle(){
+  document.documentElement.style.setProperty('--score-font', FONT_OPTIONS[state.scoreFont] || FONT_OPTIONS.default);
+  document.documentElement.style.setProperty('--score-color', state.scoreColor || '#ffffff');
+  document.documentElement.style.setProperty('--score-stroke', state.scoreStroke || '#d81f2a');
+}
+document.getElementById('fontSelect').addEventListener('change', (e)=>{
+  state.scoreFont = e.target.value; applyScoreStyle(); save();
+});
+document.getElementById('scoreColorInput').addEventListener('input', (e)=>{
+  state.scoreColor = e.target.value; applyScoreStyle(); save();
+});
+document.getElementById('scoreStrokeInput').addEventListener('input', (e)=>{
+  state.scoreStroke = e.target.value; applyScoreStyle(); save();
+});
+
+/* ---- timer ---- */
+function getElapsedMs(){
+  return state.timer.elapsedMs + (state.timer.running ? (Date.now() - state.timer.startedAt) : 0);
+}
+function formatTimer(ms){
+  const totalSec = Math.floor(ms/1000);
+  const m = Math.floor(totalSec/60);
+  const s = totalSec%60;
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+function renderTimer(){ if(!timerEditing) el.centerScore.textContent = formatTimer(getElapsedMs()); }
+function toggleTimer(){
+  if(state.timer.running){
+    state.timer.elapsedMs = getElapsedMs();
+    state.timer.running = false;
+    state.timer.startedAt = null;
+  } else {
+    state.timer.running = true;
+    state.timer.startedAt = Date.now();
+  }
+  save(); renderTimer();
+}
+function resetTimer(){
+  if(!confirm('Reset waktu pertandingan ke 00:00?')) return;
+  state.timer = { elapsedMs:0, running:false, startedAt:null };
+  save(); renderTimer();
+}
+function adjustTimer(deltaSec){
+  const current = getElapsedMs();
+  state.timer.elapsedMs = Math.max(0, current + deltaSec*1000);
+  if(state.timer.running) state.timer.startedAt = Date.now();
+  save(); renderTimer();
+}
+
+/* ---- timer: click toggles play/pause normally; in edit mode, click makes
+   the time directly editable (type mm:ss, blur or Enter to commit) ---- */
+let timerEditing = false;
+function enableTimerEdit(){
+  if(timerEditing) return;
+  if(state.timer.running){
+    state.timer.elapsedMs = getElapsedMs();
+    state.timer.running = false;
+    state.timer.startedAt = null;
+    save();
+  }
+  timerEditing = true;
+  el.centerScore.setAttribute('contenteditable', 'true');
+  el.centerScore.focus();
+  const range = document.createRange();
+  range.selectNodeContents(el.centerScore);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+function commitTimerEdit(){
+  if(!timerEditing) return;
+  timerEditing = false;
+  el.centerScore.setAttribute('contenteditable', 'false');
+  const text = el.centerScore.textContent.trim();
+  const match = text.match(/^(\d{1,3}):([0-5]?\d)$/);
+  if(match){
+    const mins = parseInt(match[1], 10);
+    const secs = parseInt(match[2], 10);
+    state.timer.elapsedMs = (mins*60 + secs) * 1000;
+    save();
+  }
+  renderTimer();
+}
+el.centerScore.addEventListener('click', ()=>{
+  if(editMode) enableTimerEdit();
+  else toggleTimer();
+});
+el.centerScore.addEventListener('blur', commitTimerEdit);
+el.centerScore.addEventListener('keydown', (e)=>{
+  if(timerEditing && e.key === 'Enter'){ e.preventDefault(); el.centerScore.blur(); }
+});
+el.centerScore.addEventListener('contextmenu', (e)=>{ e.preventDefault(); resetTimer(); });
+setInterval(()=>{ if(state.timer.running) renderTimer(); }, 500);
+
+document.getElementById('timerToggleBtn').addEventListener('click', toggleTimer);
+document.getElementById('timerResetBtn').addEventListener('click', resetTimer);
+document.getElementById('timerPlus').addEventListener('click', ()=>adjustTimer(10));
+document.getElementById('timerMinus').addEventListener('click', ()=>adjustTimer(-10));
+
+/* ---- controls panel / edit mode toggle ---- */
+function setEditMode(on){
+  editMode = on;
+  if(!on && timerEditing) el.centerScore.blur(); // commit any in-progress time edit
+  el.controls.classList.toggle('open', on);
+  document.body.classList.toggle('edit-mode', on);
+  renderSponsors();
+}
+el.ctrlTab.addEventListener('click', ()=> setEditMode(!editMode));
+document.getElementById('controlsClose').addEventListener('click', ()=> setEditMode(false));
+document.getElementById('sponsorAddBtnPanel').addEventListener('click', ()=>{ uploadTarget='sponsor:new'; el.fileInput.click(); });
+
+/* ---- center/reset the draggable settings panel position ---- */
+document.getElementById('controlsCenterBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  el.controls.style.left = '';
+  el.controls.style.top = '';
+  el.controls.style.right = '';
+  el.controls.style.bottom = '';
+});
+
+/* ---- guide popup ---- */
+const guideBackdrop = document.getElementById('guideBackdrop');
+function openGuide(){ guideBackdrop.classList.add('open'); }
+function closeGuide(){ guideBackdrop.classList.remove('open'); }
+document.getElementById('guideBtn').addEventListener('click', openGuide);
+document.getElementById('guideClose').addEventListener('click', closeGuide);
+guideBackdrop.addEventListener('click', (e)=>{ if(e.target === guideBackdrop) closeGuide(); });
+
+/* ---- draggable settings popup ---- */
+(function(){
+  const panel = el.controls;
+  const header = document.getElementById('controlsHeader');
+  let dragging=false, offsetX=0, offsetY=0;
+  function pointerDown(e){
+    dragging = true;
+    const rect = panel.getBoundingClientRect();
+    const point = e.touches ? e.touches[0] : e;
+    offsetX = point.clientX - rect.left;
+    offsetY = point.clientY - rect.top;
+    panel.style.left = rect.left + 'px';
+    panel.style.top = rect.top + 'px';
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    document.addEventListener('mousemove', pointerMove);
+    document.addEventListener('mouseup', pointerUp);
+    document.addEventListener('touchmove', pointerMove, {passive:false});
+    document.addEventListener('touchend', pointerUp);
+  }
+  function pointerMove(e){
+    if(!dragging) return;
+    if(e.cancelable) e.preventDefault();
+    const point = e.touches ? e.touches[0] : e;
+    let x = point.clientX - offsetX;
+    let y = point.clientY - offsetY;
+    const maxX = Math.max(0, window.innerWidth - panel.offsetWidth);
+    const maxY = Math.max(0, window.innerHeight - panel.offsetHeight);
+    x = Math.min(Math.max(0, x), maxX);
+    y = Math.min(Math.max(0, y), maxY);
+    panel.style.left = x + 'px';
+    panel.style.top = y + 'px';
+  }
+  function pointerUp(){
+    dragging = false;
+    document.removeEventListener('mousemove', pointerMove);
+    document.removeEventListener('mouseup', pointerUp);
+    document.removeEventListener('touchmove', pointerMove);
+    document.removeEventListener('touchend', pointerUp);
+  }
+  header.addEventListener('mousedown', pointerDown);
+  header.addEventListener('touchstart', pointerDown, {passive:true});
+})();
+
+document.getElementById('endSetBtn').addEventListener('click', endCurrentSet);
+document.getElementById('swapBtn').addEventListener('click', ()=>{
+  [state.nameA,state.nameB]=[state.nameB,state.nameA];
+  [state.crestA,state.crestB]=[state.crestB,state.crestA];
+  [state.scoreA,state.scoreB]=[state.scoreB,state.scoreA];
+  [state.setsA,state.setsB]=[state.setsB,state.setsA];
+  [state.vcA,state.vcB]=[state.vcB,state.vcA];
+  [state.toA,state.toB]=[state.toB,state.toA];
+  [state.subA,state.subB]=[state.subB,state.subA];
+  state.sets = state.sets.map(s=>{
+    if(!s) return s;
+    const parts = s.split('-');
+    return parts[1] + '-' + parts[0];
+  });
+  if(state.lastScorer === 'A') state.lastScorer = 'B';
+  else if(state.lastScorer === 'B') state.lastScorer = 'A';
+  render(); save();
+});
+document.getElementById('resetSetBtn').addEventListener('click', ()=>{
+  state.scoreA=0; state.scoreB=0;
+  state.vcA=0; state.vcB=0; state.toA=0; state.toB=0; state.subA=0; state.subB=0;
+  state.lastScorer = null;
+  render(); save();
+});
+document.getElementById('resetAllBtn').addEventListener('click', ()=>{
+  if(!confirm('Reset seluruh papan skor?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+});
+document.getElementById('fsBtn').addEventListener('click', ()=>{
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+});
+
+/* ==================== ADS: video / audio upload + fullscreen player ==================== */
+const adOverlay = document.getElementById('adOverlay');
+const adVideoEl = document.getElementById('adVideoEl');
+const adAudioName = document.getElementById('adAudioName');
+const adAudioEl = new Audio();
+adAudioEl.loop = true; // loops the current ad until the screen is clicked
+
+let adAudioPositions = {};   // adId -> last playback position in seconds (resume support)
+let activeAd = null;
+let fadeTimer = null;
+const FADE_MS = 1200;
+const FADE_STEP = 50;
+
+function clearFade(){ if(fadeTimer){ clearInterval(fadeTimer); fadeTimer=null; } }
+function fadeVolume(mediaEl, from, to, done){
+  clearFade();
+  mediaEl.volume = Math.min(1, Math.max(0, from));
+  const steps = Math.max(1, Math.round(FADE_MS/FADE_STEP));
+  let i = 0;
+  fadeTimer = setInterval(()=>{
+    i++;
+    const v = from + (to-from) * (i/steps);
+    mediaEl.volume = Math.min(1, Math.max(0, v));
+    if(i >= steps){
+      clearFade();
+      mediaEl.volume = Math.min(1, Math.max(0, to));
+      if(done) done();
+    }
+  }, FADE_STEP);
+}
+
+/* An ad is one item that may hold a video (ad.videoSrc), a separate audio
+   track (ad.audioSrc), or both:
+   - video + separate audio  -> video plays silently, the separate audio is
+     what's heard (both fade together).
+   - video only              -> the video's own audio is unmuted and used.
+   - audio only (no video)   -> behaves like the old standalone audio ad,
+     with the on-screen audio visual and "next track" queue. */
+let adAudioAttachIdx = null;
+
+function renderAds(){
+  const list = document.getElementById('adsList');
+  if(!list) return;
+  list.innerHTML = '';
+  if(!state.ads.length){
+    list.innerHTML = '<div class="ad-empty-note">Belum ada iklan diunggah.</div>';
     return;
   }
-  if(e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'z'){ el.undoBtn.click(); e.preventDefault(); return; }
-  if(e.ctrlKey && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))){ el.redoBtn.click(); e.preventDefault(); return; }
+  state.ads.forEach((ad, i)=>{
+    const hasVideo = !!ad.videoSrc;
+    const hasAudio = !!ad.audioSrc;
+    const icon = hasVideo ? '🎬' : '🎵';
+    const audioTag = hasVideo ? (hasAudio ? '<span class="ad-audio-tag" title="Audio terpisah terpasang">🎵</span>' : '') : '';
+    const row = document.createElement('div');
+    row.className = 'ad-row';
+    row.innerHTML =
+      '<span class="ad-icon">'+icon+'</span>'+
+      '<span class="ad-name" title="'+ad.name.replace(/"/g,'&quot;')+'">'+ad.name+'</span>'+
+      audioTag+
+      (hasVideo ? '<button class="ad-attach-audio" data-idx="'+i+'" title="'+(hasAudio?'Ganti audio terpisah':'Tambah audio terpisah')+'">'+(hasAudio?'🎵↺':'🎵+')+'</button>' : '')+
+      (hasVideo && hasAudio ? '<button class="ad-remove-audio" data-idx="'+i+'" title="Hapus audio terpisah, pakai suara video">🎵×</button>' : '')+
+      '<button class="ad-play" data-idx="'+i+'">▶</button>'+
+      '<button class="ad-del" data-idx="'+i+'">🗑</button>';
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.ad-play').forEach(b=>{
+    b.addEventListener('click', ()=> playAd(state.ads[Number(b.dataset.idx)]));
+  });
+  list.querySelectorAll('.ad-del').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = Number(b.dataset.idx);
+      const ad = state.ads[idx];
+      if(activeAd && ad && activeAd.id === ad.id) stopAd(true);
+      if(ad) delete adAudioPositions[ad.id];
+      state.ads.splice(idx,1);
+      render(); save();
+    });
+  });
+  list.querySelectorAll('.ad-attach-audio').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      adAudioAttachIdx = Number(b.dataset.idx);
+      document.getElementById('adAttachAudioInput').click();
+    });
+  });
+  list.querySelectorAll('.ad-remove-audio').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = Number(b.dataset.idx);
+      const ad = state.ads[idx];
+      if(!ad) return;
+      if(activeAd && activeAd.id === ad.id) stopAd(true);
+      ad.audioSrc = null;
+      render(); save();
+    });
+  });
+}
+
+document.getElementById('adAddVideoBtnPanel').addEventListener('click', ()=>{
+  document.getElementById('adVideoFileInput').click();
+});
+document.getElementById('adAddAudioBtnPanel').addEventListener('click', ()=>{
+  document.getElementById('adAudioFileInput').click();
+});
+document.getElementById('adVideoFileInput').addEventListener('change', (e)=>{
+  const files = Array.from(e.target.files || []);
+  if(!files.length) return;
+  let remaining = files.length;
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      state.ads.push({
+        id: 'ad_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        name: file.name, videoSrc: reader.result, audioSrc: null
+      });
+      remaining--;
+      if(remaining === 0){ renderAds(); save(); }
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+});
+document.getElementById('adAudioFileInput').addEventListener('change', (e)=>{
+  const files = Array.from(e.target.files || []);
+  if(!files.length) return;
+  let remaining = files.length;
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      state.ads.push({
+        id: 'ad_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        name: file.name, videoSrc: null, audioSrc: reader.result
+      });
+      remaining--;
+      if(remaining === 0){ renderAds(); save(); }
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+});
+document.getElementById('adAttachAudioInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  const idx = adAudioAttachIdx;
+  adAudioAttachIdx = null;
+  if(!file || idx === null || !state.ads[idx]){ e.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const ad = state.ads[idx];
+    ad.audioSrc = reader.result;
+    if(activeAd && activeAd.id === ad.id) stopAd(true);
+    renderAds(); save();
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+function playAd(ad){
+  if(!ad) return;
+  activeAd = ad;
+  const hasVideo = !!ad.videoSrc;
+  const hasAudio = !!ad.audioSrc;
+  adOverlay.classList.remove('mode-video','mode-audio');
+  adOverlay.classList.add(hasVideo ? 'mode-video' : 'mode-audio');
+  adOverlay.classList.add('open');
+
+  if(hasVideo){
+    if(hasAudio){
+      /* Separate audio track drives the sound; the video plays silently. */
+      adVideoEl.src = ad.videoSrc;
+      adVideoEl.loop = true;
+      adVideoEl.muted = true;
+      adVideoEl.volume = 0;
+      adVideoEl.currentTime = 0;
+      const vp = adVideoEl.play();
+      if(vp && vp.catch) vp.catch(()=>{});
+
+      adAudioEl.pause();
+      adAudioEl.src = ad.audioSrc;
+      adAudioEl.dataset.adId = ad.id;
+      adAudioEl.loop = true;
+      adAudioEl.currentTime = 0;
+      adAudioEl.volume = 0;
+      const ap = adAudioEl.play();
+      if(ap && ap.catch) ap.catch(()=>{});
+      fadeVolume(adAudioEl, 0, 1);
+    } else {
+      /* No separate audio: use the video's own soundtrack. */
+      adAudioEl.pause();
+      adVideoEl.src = ad.videoSrc;
+      adVideoEl.loop = true;
+      adVideoEl.muted = false;
+      adVideoEl.volume = 0;
+      adVideoEl.currentTime = 0;
+      const vp = adVideoEl.play();
+      if(vp && vp.catch) vp.catch(()=>{});
+      fadeVolume(adVideoEl, 0, 1);
+    }
+  } else {
+    /* Audio-only ad: no video, show the audio visual. */
+    adVideoEl.pause();
+    adVideoEl.removeAttribute('src');
+    adVideoEl.load();
+    adAudioName.textContent = ad.name;
+    if(adAudioEl.dataset.adId !== ad.id){
+      adAudioEl.src = ad.audioSrc;
+      adAudioEl.dataset.adId = ad.id;
+      adAudioEl.currentTime = adAudioPositions[ad.id] || 0;
+    }
+    adAudioEl.loop = true;
+    adAudioEl.volume = 0;
+    const ap = adAudioEl.play();
+    if(ap && ap.catch) ap.catch(()=>{});
+    fadeVolume(adAudioEl, 0, 1);
+  }
+}
+
+function stopAd(instant){
+  if(!activeAd) return;
+  const ad = activeAd;
+  const hasVideo = !!ad.videoSrc;
+  const hasAudio = !!ad.audioSrc;
+  const finish = ()=>{
+    adOverlay.classList.remove('open');
+    if(hasVideo){
+      adVideoEl.pause();
+      adVideoEl.removeAttribute('src');
+      adVideoEl.load();
+    }
+    if(hasAudio){
+      adAudioEl.pause();
+      if(!hasVideo) adAudioPositions[ad.id] = adAudioEl.currentTime; // resume position only matters for audio-only ads
+    }
+    activeAd = null;
+  };
+  if(instant){ finish(); return; }
+  /* Fade whichever element is actually producing the sound. */
+  if(hasVideo && !hasAudio) fadeVolume(adVideoEl, adVideoEl.volume, 0, finish);
+  else if(hasAudio) fadeVolume(adAudioEl, adAudioEl.volume, 0, finish);
+  else finish();
+}
+
+function nextAudioAd(){
+  if(!activeAd || activeAd.videoSrc) return; // queue only applies to audio-only ads
+  const audioAds = state.ads.filter(a=>!a.videoSrc && a.audioSrc);
+  if(audioAds.length < 2) return;
+  const curIdx = audioAds.findIndex(a=>a.id === activeAd.id);
+  adAudioPositions[activeAd.id] = adAudioEl.currentTime;
+  const next = audioAds[(curIdx+1) % audioAds.length];
+  playAd(next);
+}
+document.getElementById('adNextBtn').addEventListener('click', (e)=>{ e.stopPropagation(); nextAudioAd(); });
+adOverlay.addEventListener('click', (e)=>{
+  if(e.target.closest('#adNextBtn')) return;
+  stopAd();
+});
+
+/* ==================== SHORTCUT CUSTOMIZATION ==================== */
+const shortcutBackdrop = document.getElementById('shortcutBackdrop');
+function renderShortcutGrid(){
+  const grid = document.getElementById('shortcutGrid');
+  grid.innerHTML = '';
+  Object.keys(SHORTCUT_LABELS).forEach(key=>{
+    const label = document.createElement('div');
+    label.textContent = SHORTCUT_LABELS[key];
+    const input = document.createElement('input');
+    input.maxLength = 1;
+    input.value = (state.shortcuts[key] || '').toUpperCase();
+    input.dataset.key = key;
+    grid.appendChild(label);
+    grid.appendChild(input);
+  });
+}
+function openShortcutModal(){ renderShortcutGrid(); shortcutBackdrop.classList.add('open'); }
+function closeShortcutModal(){ shortcutBackdrop.classList.remove('open'); }
+document.getElementById('shortcutBtn').addEventListener('click', openShortcutModal);
+document.getElementById('shortcutClose').addEventListener('click', closeShortcutModal);
+shortcutBackdrop.addEventListener('click', (e)=>{ if(e.target === shortcutBackdrop) closeShortcutModal(); });
+
+document.getElementById('shortcutSaveBtn').addEventListener('click', ()=>{
+  const inputs = document.querySelectorAll('#shortcutGrid input');
+  const used = new Set();
+  let ok = true;
+  inputs.forEach(inp=>{
+    const v = inp.value.trim().toLowerCase();
+    if(!v || used.has(v)) ok = false;
+    used.add(v);
+  });
+  if(!ok){ alert('Setiap kontrol harus memiliki satu huruf/angka unik.'); return; }
+  inputs.forEach(inp=>{ state.shortcuts[inp.dataset.key] = inp.value.trim().toLowerCase(); });
+  save();
+  closeShortcutModal();
+});
+document.getElementById('shortcutResetBtn').addEventListener('click', ()=>{
+  state.shortcuts = Object.assign({}, DEFAULT_SHORTCUTS);
+  renderShortcutGrid();
+  save();
+});
+
+/* ---- printable control reference sheet ---- */
+function printControls(){
+  const sheet = document.getElementById('printSheet');
+  const rows = Object.keys(SHORTCUT_LABELS).map(key=>{
+    return '<div class="print-item"><span class="print-key">'+(state.shortcuts[key]||'').toUpperCase()+'</span><span class="print-label">'+SHORTCUT_LABELS[key]+'</span></div>';
+  }).join('');
+  sheet.innerHTML =
+    '<h1>Kontrol Papan Skor Voli</h1>'+
+    '<div class="psub">'+state.nameA+' vs '+state.nameB+'</div>'+
+    '<div class="print-grid">'+rows+'</div>'+
+    '<div class="print-footer">Catatan: kontrol dapat diubah lewat menu "Kustomisasi &amp; Cetak Kontrol".</div>';
+  window.print();
+}
+document.getElementById('printControlsBtn').addEventListener('click', printControls);
+
+/* ---- keyboard shortcuts (customizable, ignored while typing anywhere editable) ---- */
+function isTypingContext(){
+  const active = document.activeElement;
+  if(!active) return false;
+  if(active.isContentEditable) return true;
+  const tag = active.tagName;
+  if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  if(active.closest && active.closest('[contenteditable="true"]')) return true;
+  return false;
+}
+document.addEventListener('keydown', (e)=>{
+  if(isTypingContext()) return;
   const k = e.key.toLowerCase();
+  const sc = state.shortcuts;
+  const editOnlyKeys = [sc.scoreAMinus, sc.scoreBMinus, sc.setAMinus, sc.setBMinus, sc.endSet];
+  if(editOnlyKeys.includes(k) && !editMode) return;
   switch(k){
-    case 'w': pushHistory(); state.setsA = (state.setsA||0)+1; render(); save(); break;
-    case 's': pushHistory(); state.setsA = Math.max(0,(state.setsA||0)-1); render(); save(); break;
-    case 'i': pushHistory(); state.setsB = (state.setsB||0)+1; render(); save(); break;
-    case 'k': pushHistory(); state.setsB = Math.max(0,(state.setsB||0)-1); render(); save(); break;
-    case 'x': document.getElementById('swap').click(); break;
-    case '0': document.getElementById('resetScore').click(); break;
+    case sc.scoreAPlus: adjustScore('A',1); return;
+    case sc.scoreAMinus: adjustScore('A',-1); return;
+    case sc.scoreBPlus: adjustScore('B',1); return;
+    case sc.scoreBMinus: adjustScore('B',-1); return;
+    case sc.setAPlus: state.setsA++; break;
+    case sc.setAMinus: state.setsA=Math.max(0,state.setsA-1); break;
+    case sc.setBPlus: state.setsB++; break;
+    case sc.setBMinus: state.setsB=Math.max(0,state.setsB-1); break;
+    case sc.timer: toggleTimer(); return;
+    case sc.endSet: endCurrentSet(); return;
+    case sc.fullscreen: document.getElementById('fsBtn').click(); return;
+    case sc.panel: setEditMode(!editMode); return;
     default: return;
   }
+  render(); save();
   e.preventDefault();
 });
 
 load();
-
 </script>
 </body>
 </html>
