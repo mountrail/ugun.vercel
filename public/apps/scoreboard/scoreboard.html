@@ -135,6 +135,9 @@
 
   .ctrl-tab{ position:fixed; bottom:10px; right:10px; z-index:50; width:34px; height:34px; border-radius:50%;
     background:rgba(0,0,0,.35); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; }
+  .panel-reset-btn{ position:fixed; bottom:10px; right:50px; z-index:50; width:34px; height:34px; border-radius:50%;
+    background:rgba(0,0,0,.35); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; }
+  .panel-reset-btn:hover{ background:rgba(0,0,0,.5); }
 
   /* Settings popup: draggable floating card */
   .controls{ position:fixed; bottom:56px; right:10px; z-index:49; background:rgba(15,15,20,.96); color:#fff;
@@ -185,17 +188,59 @@
   /* Fullscreen ad overlay */
   .ad-overlay{ position:fixed; inset:0; z-index:300; background:#000; display:none; align-items:center; justify-content:center; cursor:pointer; }
   .ad-overlay.open{ display:flex; }
-  .ad-overlay video{ width:100%; height:100%; object-fit:contain; display:none; background:#000; }
-  .ad-overlay.mode-video video{ display:block; }
-  .ad-audio-visual{ display:none; flex-direction:column; align-items:center; gap:16px; color:#fff; text-align:center; padding:20px; }
-  .ad-overlay.mode-audio .ad-audio-visual{ display:flex; }
-  .ad-audio-icon{ font-size:70px; animation:adPulse 1.4s ease-in-out infinite; }
-  @keyframes adPulse{ 0%,100%{ transform:scale(1); opacity:.85; } 50%{ transform:scale(1.12); opacity:1; } }
-  .ad-audio-name{ font-size:20px; font-weight:700; letter-spacing:.4px; max-width:80vw; word-break:break-word; }
-  .ad-audio-hint{ font-size:12px; opacity:.55; }
-  .ad-next-btn{ background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:20px;
-    padding:8px 18px; font-size:13px; cursor:pointer; }
-  .ad-next-btn:hover{ background:rgba(255,255,255,.22); }
+  .ad-overlay video{ width:100%; height:100%; object-fit:contain; display:block; background:#000; }
+
+  /* ---- Switching-side overlay ---- */
+  .side-switch-overlay{ position:fixed; inset:0; z-index:220; display:flex; align-items:center; justify-content:center;
+    pointer-events:none; opacity:0; }
+  .side-switch-overlay.active{ opacity:1; }
+  .side-switch-overlay .switch-badge{ display:flex; align-items:center; gap:16px; padding:16px 42px;
+    background:rgba(10,10,14,.88); border:3px solid #fff; border-radius:16px; color:#fff;
+    font-family:var(--score-font); font-size:clamp(22px,3.4vw,40px); letter-spacing:2px; white-space:nowrap;
+    box-shadow:0 14px 46px rgba(0,0,0,.55); transform:translateX(-160%) scale(.8); }
+  .side-switch-overlay .switch-icon{ display:inline-block; font-size:1.1em; }
+  .side-switch-overlay.active .switch-badge{ animation:sideSwitchSlide 1.15s cubic-bezier(.16,.9,.2,1) forwards; }
+  .side-switch-overlay.active .switch-icon{ animation:sideSwitchSpin 1.15s cubic-bezier(.16,.9,.2,1) forwards; }
+  @keyframes sideSwitchSlide{
+    0%{ transform:translateX(-160%) scale(.8); opacity:0; }
+    14%{ opacity:1; }
+    46%{ transform:translateX(0) scale(1.06); }
+    62%{ transform:translateX(0) scale(1); }
+    84%{ transform:translateX(0) scale(1); opacity:1; }
+    100%{ transform:translateX(160%) scale(.8); opacity:0; }
+  }
+  @keyframes sideSwitchSpin{ 0%{ transform:rotate(0deg); } 62%{ transform:rotate(360deg); } 100%{ transform:rotate(360deg); } }
+
+  /* ---- Set-end crest pop overlay ---- */
+  .set-end-overlay{ position:fixed; inset:0; z-index:220; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:22px; pointer-events:none; opacity:0; }
+  .set-end-overlay.active{ opacity:1; }
+  .set-end-label{ font-family:var(--score-font); color:#fff; font-size:clamp(16px,2.4vw,26px); letter-spacing:3px;
+    background:var(--red); padding:6px 22px; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.5);
+    opacity:0; transform:translateY(-10px); }
+  .set-end-overlay.active .set-end-label{ animation:setEndLabelFade 1.9s ease forwards; }
+  @keyframes setEndLabelFade{
+    0%{ opacity:0; transform:translateY(-10px); }
+    12%{ opacity:1; transform:translateY(0); }
+    82%{ opacity:1; transform:translateY(0); }
+    100%{ opacity:0; transform:translateY(-10px); }
+  }
+  .set-end-crests{ display:flex; align-items:center; gap:clamp(30px,7vw,90px); perspective:900px; }
+  .set-end-crest{ width:clamp(110px,16vw,190px); height:clamp(110px,16vw,190px); border-radius:50%;
+    background:rgba(12,12,16,.72); border:4px solid rgba(255,255,255,.85); display:flex; align-items:center;
+    justify-content:center; overflow:hidden; font-size:clamp(40px,7vw,70px); box-shadow:0 10px 40px rgba(0,0,0,.55);
+    transform:scale(0) rotateY(0deg); opacity:0; transform-style:preserve-3d; }
+  .set-end-crest img{ width:78%; height:78%; object-fit:contain; }
+  .set-end-crest.winner{ border-color:gold; box-shadow:0 0 46px rgba(255,215,0,.65),0 10px 40px rgba(0,0,0,.55); }
+  .set-end-overlay.active .set-end-crest{ animation:crestPopSpin 1.9s cubic-bezier(.2,.85,.25,1) forwards; }
+  @keyframes crestPopSpin{
+    0%{ transform:scale(0) rotateY(0deg); opacity:0; }
+    16%{ transform:scale(1.12) rotateY(200deg); opacity:1; }
+    32%{ transform:scale(1) rotateY(380deg); opacity:1; }
+    78%{ transform:scale(1) rotateY(380deg); opacity:1; }
+    92%{ transform:scale(1.1) rotateY(380deg); opacity:1; }
+    100%{ transform:scale(0) rotateY(560deg); opacity:0; }
+  }
 
   /* Modal popup (Guide / Shortcuts) */
   .modal-backdrop{ position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.55);
@@ -296,11 +341,11 @@
     </div>
 
     <div class="ctrl-tab" id="ctrlTab" title="Buka/tutup kontrol">⚙</div>
+    <div class="panel-reset-btn" id="controlsCenterBtn" title="Kembalikan posisi panel pengaturan">🎯</div>
     <div class="controls" id="controls">
       <div class="controls-header" id="controlsHeader">
         <span>⚙ PENGATURAN</span>
         <div class="controls-header-actions">
-          <span class="controls-close" id="controlsCenterBtn" title="Tengahkan panel">🎯</span>
           <span class="controls-close" id="controlsClose" title="Tutup">×</span>
         </div>
       </div>
@@ -340,12 +385,10 @@
         <button id="bgResetBtn">Reset Latar</button>
         <div class="divider"></div>
         <div class="ads-section">
-          <div style="font-size:12px;font-weight:800;opacity:.8;margin-bottom:6px;">🎬 IKLAN (VIDEO + AUDIO)</div>
+          <div style="font-size:12px;font-weight:800;opacity:.8;margin-bottom:6px;">🎬 IKLAN (VIDEO + MUSIK TAMBAHAN)</div>
           <div id="adsList" style="display:flex;flex-direction:column;gap:4px;max-height:150px;overflow-y:auto;margin-bottom:8px;"></div>
-          <div style="display:flex;gap:6px;">
-            <button id="adAddVideoBtnPanel" style="flex:1;">+ Video</button>
-            <button id="adAddAudioBtnPanel" style="flex:1;">+ Audio</button>
-          </div>
+          <button id="adAddVideoBtnPanel" style="width:100%;">+ Tambah Video</button>
+          <div id="storageInfo" style="font-size:11px;opacity:.7;margin-top:6px;text-align:center;"></div>
         </div>
         <div class="divider"></div>
         <button id="saveLoadBtn" style="width:100%;">💾 Simpan / Muat Game</button>
@@ -363,11 +406,12 @@
           <p><b>Akhiri Set</b> — tombol "Akhiri Set →" mencatat skor set saat ini ke kotak riwayat set, menambah jumlah set pemenang, lalu me-reset skor & statistik untuk set berikutnya. Skor akhir TIDAK direset otomatis, jadi penonton tetap bisa melihat hasil akhir sampai Anda menekan tombol ini.</p>
           <p><b>Jam Pertandingan</b> — klik jam untuk mulai/jeda saat mode edit tidak aktif. Saat mode edit aktif, klik jam untuk mengetik ulang waktunya secara manual. Klik kanan jam atau tombol "Reset Timer" akan meminta konfirmasi sebelum me-reset.</p>
           <p><b>Font & Warna Skor</b> — pilih jenis huruf (termasuk Black Ops One), warna isi angka, dan warna outline angka besar dari panel pengaturan.</p>
-          <p><b>Iklan Video/Audio</b> — tambahkan iklan video lewat "+ Video" atau iklan audio lewat "+ Audio" di panel pengaturan. Untuk iklan video, Anda bisa memasang trek audio terpisah dengan tombol 🎵+ pada daftar iklan; jika terpasang, audio terpisah itu yang berbunyi (video tampil bisu), dan jika tidak ada audio terpisah, suara asli videonya sendiri yang diputar. Klik ▶ untuk memutar layar penuh, berulang (loop) sampai layar diklik. Volume selalu memudar masuk/keluar agar penonton tidak kaget. Iklan audio (tanpa video) mengingat posisi terakhirnya dan bisa ditumpuk sebagai antrean — gunakan tombol "Lagu Berikutnya" di layar untuk berpindah ke iklan audio berikutnya.</p>
+          <p><b>Iklan Video</b> — tambahkan video iklan lewat "+ Tambah Video" di panel pengaturan. Setiap iklan bisa dipasangi musik tambahan dengan tombol 🎵+ pada daftar iklan; jika terpasang, musik itu yang berbunyi (video tampil bisu) dan akan melanjutkan dari posisi terakhirnya setiap kali iklan yang sama diputar lagi. Tanpa musik tambahan, suara asli video sendiri yang diputar. Klik ▶ untuk memutar layar penuh, berulang (loop) sampai layar diklik — layar langsung tertutup begitu diklik, sementara suaranya memudar (fade out) singkat di belakang layar. Saat mulai diputar, suara juga memudar masuk (fade in) secara perlahan agar penonton tidak kaget.</p>
           <p><b>Ukuran Logo Klub</b> — geser "Ukuran Logo Klub" di panel pengaturan untuk memperbesar/memperkecil logo tanpa mengubah ukuran lainnya.</p>
           <p><b>Klik Kanan = Kurangi</b> — klik kanan (RMB) pada skor, set, VC, T-O, atau SUB manapun akan langsung menguranginya satu, kapan saja (tidak perlu mode edit).</p>
           <p><b>Titik Penanda Skor</b> — titik kecil muncul di bawah skor tim yang baru saja mencetak poin, memudahkan mengetahui siapa yang terakhir mencetak.</p>
           <p><b>Simpan / Muat Game</b> — gunakan "💾 Simpan / Muat Game" untuk menyimpan seluruh kondisi papan skor ke salah satu slot (seperti save game), dan memuatnya kembali kapan pun dibutuhkan — tanpa perlu file ekspor/impor.</p>
+          <p><b>Info Penyimpanan</b> — di bawah tombol "+ Tambah Video" ada indikator kecil yang menunjukkan berapa banyak ruang penyimpanan perangkat yang sudah terpakai oleh iklan, dan akan memberi peringatan ⚠️ sebelum penyimpanan penuh.</p>
           <p><b>Panel Pengaturan</b> — panel ini bisa digeser (drag) ke posisi mana pun dengan menahan bagian judul di atas. Klik ikon 🎯 di judul panel untuk mengembalikannya ke posisi semula.</p>
           <p><b>Kustomisasi Kontrol</b> — buka "⌨️ Kustomisasi & Cetak Kontrol" untuk mengganti tombol keyboard pintasan, atau mencetak lembar referensi kontrol.</p>
           <p><b>Keyboard (default):</b> Q/A skor A, U/J skor B, W/S set A, I/K set B, N akhiri set (hanya saat mode edit aktif) — T timer, F layar penuh, H buka/tutup panel (selalu aktif). Tombol ini dapat diganti lewat menu Kustomisasi Kontrol.</p>
@@ -401,11 +445,17 @@
 
     <div class="ad-overlay" id="adOverlay">
       <video id="adVideoEl" playsinline></video>
-      <div class="ad-audio-visual">
-        <div class="ad-audio-icon">🎵</div>
-        <div class="ad-audio-name" id="adAudioName"></div>
-        <button class="ad-next-btn" id="adNextBtn">Lagu Berikutnya ▸</button>
-        <div class="ad-audio-hint">Klik di mana saja untuk berhenti</div>
+    </div>
+
+    <div class="side-switch-overlay" id="switchOverlay">
+      <div class="switch-badge"><span class="switch-icon">⇄</span><span>TUKAR SISI</span></div>
+    </div>
+
+    <div class="set-end-overlay" id="setEndOverlay">
+      <div class="set-end-label" id="setEndLabel">SET SELESAI</div>
+      <div class="set-end-crests">
+        <div class="set-end-crest" id="setEndCrestA">🛡️</div>
+        <div class="set-end-crest" id="setEndCrestB">🏐</div>
       </div>
     </div>
 
@@ -413,13 +463,268 @@
 
     <input type="file" id="fileInput" accept="image/*">
     <input type="file" id="adVideoFileInput" accept="video/*" multiple>
-    <input type="file" id="adAudioFileInput" accept="audio/*" multiple>
     <input type="file" id="adAttachAudioInput" accept="audio/*">
   </div>
 
 <script>
 const STORAGE_KEY = 'volleyballScoreboard_v4';
 const NUM_SETS = 5;
+
+/* ==================== AD MEDIA STORAGE (IndexedDB) ====================
+   Video/audio ad files can easily reach tens of MB — far beyond
+   localStorage's ~5-10MB quota, which is what was throwing
+   "QuotaExceededError" on save(). They're kept in IndexedDB instead, which
+   has a much larger limit; only lightweight metadata (id/name/hasVideo/
+   hasAudio) lives in the regular saved state/localStorage.
+   Media is stored as raw Blob objects (IndexedDB supports this natively)
+   rather than base64 data-URL strings — base64 inflates size by ~33%, so
+   this alone buys back a meaningful chunk of quota. For playback each Blob
+   is turned into a short-lived object URL (blob:...) via
+   URL.createObjectURL, cached until the blob is replaced/removed. */
+const AD_DB_NAME = 'scoreboardAdMedia';
+const AD_STORE_NAME = 'adMedia';
+const MEDIA_STORE_NAME = 'media';
+let adMediaCache = {}; // id -> {videoBlob, audioBlob, videoUrl?, audioUrl?}
+
+function openAdDB(){
+  return new Promise((resolve)=>{
+    if(!window.indexedDB){ resolve(null); return; }
+    const req = indexedDB.open(AD_DB_NAME, 2);
+    req.onupgradeneeded = ()=>{
+      const db = req.result;
+      if(!db.objectStoreNames.contains(AD_STORE_NAME)){
+        db.createObjectStore(AD_STORE_NAME, { keyPath:'id' });
+      }
+      if(!db.objectStoreNames.contains(MEDIA_STORE_NAME)){
+        db.createObjectStore(MEDIA_STORE_NAME, { keyPath:'id' });
+      }
+    };
+    req.onsuccess = ()=> resolve(req.result);
+    req.onerror = ()=>{ console.error('IndexedDB open failed', req.error); resolve(null); };
+  });
+}
+const adDBPromise = openAdDB();
+
+/* data: { videoBlob?, audioBlob? } — Blob/File or null. Only keys present in
+   `data` are replaced; omitted keys keep whatever was already stored (so
+   e.g. attaching music only needs to pass {audioBlob}). */
+async function putAdMedia(id, data){
+  const existing = adMediaCache[id] || {};
+  if('videoBlob' in data && existing.videoUrl){ URL.revokeObjectURL(existing.videoUrl); }
+  if('audioBlob' in data && existing.audioUrl){ URL.revokeObjectURL(existing.audioUrl); }
+  const merged = {
+    videoBlob: ('videoBlob' in data) ? data.videoBlob : (existing.videoBlob || null),
+    audioBlob: ('audioBlob' in data) ? data.audioBlob : (existing.audioBlob || null),
+  };
+  adMediaCache[id] = merged;
+  const db = await adDBPromise;
+  if(!db) return;
+  return new Promise((resolve)=>{
+    const tx = db.transaction(AD_STORE_NAME, 'readwrite');
+    tx.objectStore(AD_STORE_NAME).put({ id, videoBlob: merged.videoBlob, audioBlob: merged.audioBlob });
+    tx.oncomplete = ()=> resolve();
+    tx.onerror = ()=>{ console.error('Ad media save failed', tx.error); resolve(); };
+  });
+}
+async function deleteAdMedia(id){
+  const existing = adMediaCache[id];
+  if(existing){
+    if(existing.videoUrl) URL.revokeObjectURL(existing.videoUrl);
+    if(existing.audioUrl) URL.revokeObjectURL(existing.audioUrl);
+  }
+  delete adMediaCache[id];
+  const db = await adDBPromise;
+  if(!db) return;
+  return new Promise((resolve)=>{
+    const tx = db.transaction(AD_STORE_NAME, 'readwrite');
+    tx.objectStore(AD_STORE_NAME).delete(id);
+    tx.oncomplete = ()=> resolve();
+    tx.onerror = ()=> resolve();
+  });
+}
+async function loadAllAdMediaIntoCache(){
+  const db = await adDBPromise;
+  if(!db) return;
+  return new Promise((resolve)=>{
+    const tx = db.transaction(AD_STORE_NAME, 'readonly');
+    const req = tx.objectStore(AD_STORE_NAME).getAll();
+    req.onsuccess = ()=>{
+      (req.result||[]).forEach(item=>{
+        /* Records from before this update stored media as base64 data-URL
+           strings under videoSrc/audioSrc. Keep them readable here (as a
+           string, temporarily) — migrateAds() converts them to real Blobs
+           and re-saves under the current schema right after this runs. */
+        adMediaCache[item.id] = {
+          videoBlob: item.videoBlob !== undefined ? item.videoBlob : (item.videoSrc || null),
+          audioBlob: item.audioBlob !== undefined ? item.audioBlob : (item.audioSrc || null),
+        };
+      });
+      resolve();
+    };
+    req.onerror = ()=> resolve();
+  });
+}
+async function dataUrlToBlob(dataUrl){
+  try{
+    const res = await fetch(dataUrl);
+    return await res.blob();
+  }catch(e){
+    console.error('Failed converting legacy ad data to a Blob', e);
+    return null;
+  }
+}
+/* Lazily creates (and caches) object URLs for a cached ad's blobs, for
+   assigning directly to a <video>/<audio> element's src. */
+function getAdSrcs(id){
+  const media = adMediaCache[id];
+  if(!media) return { videoSrc:null, audioSrc:null };
+  if(media.videoBlob && !media.videoUrl) media.videoUrl = URL.createObjectURL(media.videoBlob);
+  if(media.audioBlob && !media.audioUrl) media.audioUrl = URL.createObjectURL(media.audioBlob);
+  return { videoSrc: media.videoUrl || null, audioSrc: media.audioUrl || null };
+}
+
+/* ==================== TEAM/BG MEDIA STORAGE (IndexedDB) ====================
+   Crest logos, sponsor logos and the background image used to be inlined as
+   base64 straight into the one JSON blob written to localStorage — sharing
+   the same ~5-10MB quota as the score/set/timer data. A couple of large
+   logos was enough to blow that quota, and because the whole state blob is
+   written as a single atomic localStorage.setItem() call, a quota failure
+   meant the score/set numbers silently stopped being persisted too, even
+   though nothing about the numbers themselves was large.
+   These images now live here instead, as raw Blobs in the same
+   larger-quota IndexedDB the ad media already uses. `state` only ever
+   holds a short id string (e.g. "crest_172..._ab12x") referencing the
+   record, so the score/set space in localStorage stays tiny text and can
+   never fail to save just because a background image or logo is big. */
+let mediaCache = {}; // id -> {blob, url?}
+function genMediaId(prefix){ return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+async function putMedia(id, blob){
+  const existing = mediaCache[id];
+  if(existing && existing.url) URL.revokeObjectURL(existing.url);
+  mediaCache[id] = { blob, url:null };
+  const db = await adDBPromise;
+  if(!db) return;
+  return new Promise((resolve)=>{
+    const tx = db.transaction(MEDIA_STORE_NAME, 'readwrite');
+    tx.objectStore(MEDIA_STORE_NAME).put({ id, blob });
+    tx.oncomplete = ()=> resolve();
+    tx.onerror = ()=>{ console.error('Media save failed', tx.error); resolve(); };
+  });
+}
+async function deleteMedia(id){
+  const existing = mediaCache[id];
+  if(existing && existing.url) URL.revokeObjectURL(existing.url);
+  delete mediaCache[id];
+  const db = await adDBPromise;
+  if(!db) return;
+  return new Promise((resolve)=>{
+    const tx = db.transaction(MEDIA_STORE_NAME, 'readwrite');
+    tx.objectStore(MEDIA_STORE_NAME).delete(id);
+    tx.oncomplete = ()=> resolve();
+    tx.onerror = ()=> resolve();
+  });
+}
+async function loadAllMediaIntoCache(){
+  const db = await adDBPromise;
+  if(!db) return;
+  return new Promise((resolve)=>{
+    const tx = db.transaction(MEDIA_STORE_NAME, 'readonly');
+    const req = tx.objectStore(MEDIA_STORE_NAME).getAll();
+    req.onsuccess = ()=>{
+      (req.result||[]).forEach(item=>{ mediaCache[item.id] = { blob:item.blob, url:null }; });
+      resolve();
+    };
+    req.onerror = ()=> resolve();
+  });
+}
+/* Resolves a stored id to something usable directly as an <img>/CSS src.
+   Falls back to returning the value as-is if it's still a legacy base64
+   data: URL that migrateMedia() hasn't converted yet. */
+function getMediaUrl(id){
+  if(!id) return null;
+  if(typeof id === 'string' && id.startsWith('data:')) return id;
+  const media = mediaCache[id];
+  if(!media) return null;
+  if(!media.url) media.url = URL.createObjectURL(media.blob);
+  return media.url;
+}
+/* True if `id` is still referenced by any save slot's stored state. */
+function isMediaIdUsedInSlots(id){
+  for(let i=1;i<=SAVE_SLOTS;i++){
+    let raw;
+    try{ raw = localStorage.getItem(slotKey(i)); }catch(e){ continue; }
+    if(!raw) continue;
+    try{
+      const s = (JSON.parse(raw).state)||{};
+      if(s.crestA===id || s.crestB===id || s.bgImage===id) return true;
+      if(Array.isArray(s.sponsors) && s.sponsors.includes(id)) return true;
+    }catch(e){}
+  }
+  return false;
+}
+/* True if `id` is referenced by the live state or by any save slot, so
+   replacing/removing an image never deletes a blob a save slot still
+   needs. */
+function isMediaIdUsed(id){
+  if(!id) return false;
+  if(state.crestA===id || state.crestB===id || state.bgImage===id) return true;
+  if(Array.isArray(state.sponsors) && state.sponsors.includes(id)) return true;
+  return isMediaIdUsedInSlots(id);
+}
+async function cleanupMediaIfUnused(id){
+  if(!id || (typeof id === 'string' && id.startsWith('data:'))) return;
+  if(!isMediaIdUsed(id)) await deleteMedia(id);
+}
+/* One-time migration: any crest/bg/sponsor field still holding a raw
+   base64 data: URL (from before this update) gets converted to a Blob and
+   moved into IndexedDB, with the field replaced by its new id. */
+async function migrateMediaField(id){
+  if(!id || typeof id !== 'string' || !id.startsWith('data:')) return id;
+  const blob = await dataUrlToBlob(id);
+  if(!blob) return null;
+  const newId = genMediaId('media');
+  await putMedia(newId, blob);
+  return newId;
+}
+async function migrateMedia(){
+  state.crestA = await migrateMediaField(state.crestA);
+  state.crestB = await migrateMediaField(state.crestB);
+  state.bgImage = await migrateMediaField(state.bgImage);
+  if(Array.isArray(state.sponsors)){
+    const out = [];
+    for(const s of state.sponsors){ const m = await migrateMediaField(s); if(m) out.push(m); }
+    state.sponsors = out;
+  }
+}
+
+/* ---- storage usage indicator + persistence request ----
+   Surfaces navigator.storage.estimate() in the settings panel so the
+   operator sees how much room is left well before hitting the ceiling,
+   instead of finding out via a crash. navigator.storage.persist() asks the
+   browser not to silently evict this data under disk pressure — it's not
+   guaranteed, but it improves the odds. */
+async function requestPersistentStorage(){
+  try{
+    if(navigator.storage && navigator.storage.persist) await navigator.storage.persist();
+  }catch(e){ /* not critical if this fails or isn't supported */ }
+}
+async function updateStorageInfo(){
+  const infoEl = document.getElementById('storageInfo');
+  if(!infoEl) return;
+  if(!(navigator.storage && navigator.storage.estimate)){ infoEl.textContent = ''; return; }
+  try{
+    const { usage, quota } = await navigator.storage.estimate();
+    if(!quota){ infoEl.textContent = ''; return; }
+    const usedMB = (usage/1024/1024).toFixed(1);
+    const quotaMB = (quota/1024/1024) >= 1024 ? (quota/1024/1024/1024).toFixed(1)+' GB' : (quota/1024/1024).toFixed(0)+' MB';
+    const pct = Math.min(100, Math.round((usage/quota)*100));
+    let warn = '';
+    if(pct >= 90) warn = ' ⚠️ Penyimpanan hampir penuh!';
+    else if(pct >= 75) warn = ' ⚠️';
+    infoEl.textContent = 'Penyimpanan terpakai: ' + usedMB + ' MB dari ' + quotaMB + ' (' + pct + '%)' + warn;
+    infoEl.style.color = pct >= 90 ? '#ff6b6b' : (pct >= 75 ? '#ffb84d' : '');
+  }catch(e){ infoEl.textContent = ''; }
+}
 
 const DEFAULT_SHORTCUTS = {
   scoreAPlus:'q', scoreAMinus:'a',
@@ -461,15 +766,43 @@ let state = {
   shortcuts: Object.assign({}, DEFAULT_SHORTCUTS)
 };
 
-/* Old ad shape was {type:'video'|'audio', src}. New shape is {videoSrc, audioSrc}
-   so a single ad can carry both a video and its own separate audio track. */
-function migrateAds(){
+/* Ad entries only ever carried metadata going forward: {id, name, hasVideo,
+   hasAudio}. Older saves may have the media inline as base64 in localStorage
+   ({videoSrc,audioSrc} or the original {type,src}), or already in IndexedDB
+   but still as base64 strings from before the Blob-storage switch — all of
+   these get normalized into real Blobs in IndexedDB here. */
+async function migrateAds(){
   if(!Array.isArray(state.ads)) { state.ads = []; return; }
-  state.ads = state.ads.map(a=>{
-    if(a.videoSrc !== undefined || a.audioSrc !== undefined) return a;
-    if(a.type === 'video') return { id:a.id, name:a.name, videoSrc:a.src, audioSrc:null };
-    return { id:a.id, name:a.name, videoSrc:null, audioSrc:a.src };
-  });
+  const migrated = [];
+  for(const a of state.ads){
+    if(a.hasVideo !== undefined || a.hasAudio !== undefined){
+      if(!a.hasVideo){ await deleteAdMedia(a.id); continue; } // audio-only ads are no longer supported
+      // If this ad's IndexedDB record still has base64 strings (pre-Blob schema), convert them now.
+      const existing = adMediaCache[a.id];
+      if(existing && (typeof existing.videoBlob === 'string' || typeof existing.audioBlob === 'string')){
+        const videoBlob = typeof existing.videoBlob === 'string' ? await dataUrlToBlob(existing.videoBlob) : (existing.videoBlob || null);
+        const audioBlob = typeof existing.audioBlob === 'string' ? await dataUrlToBlob(existing.audioBlob) : (existing.audioBlob || null);
+        await putAdMedia(a.id, { videoBlob, audioBlob });
+      }
+      migrated.push({ id:a.id, name:a.name, hasVideo:true, hasAudio:!!a.hasAudio });
+      continue;
+    }
+    let videoSrc=null, audioSrc=null;
+    if(a.videoSrc !== undefined || a.audioSrc !== undefined){
+      videoSrc = a.videoSrc || null; audioSrc = a.audioSrc || null;
+    } else if(a.type === 'video'){
+      videoSrc = a.src || null;
+    } else if(a.src){
+      audioSrc = a.src || null;
+    }
+    if(!videoSrc) continue; // audio-only ads are no longer supported
+    const id = a.id || ('ad_' + Date.now() + '_' + Math.random().toString(36).slice(2,7));
+    const videoBlob = await dataUrlToBlob(videoSrc);
+    const audioBlob = audioSrc ? await dataUrlToBlob(audioSrc) : null;
+    await putAdMedia(id, { videoBlob, audioBlob });
+    migrated.push({ id, name:a.name, hasVideo:true, hasAudio:!!audioBlob });
+  }
+  state.ads = migrated;
 }
 
 function applyStateToUI(){
@@ -487,19 +820,32 @@ function applyStateToUI(){
   document.getElementById('bgColorInput').value = state.bgColor || '#e7e9ea';
 }
 
-function load(){
+async function load(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
     if(raw){
       const parsed = JSON.parse(raw);
       state = Object.assign(state, parsed);
       state.shortcuts = Object.assign({}, DEFAULT_SHORTCUTS, parsed.shortcuts || {});
-      migrateAds();
     }
   }catch(e){}
+  requestPersistentStorage(); // ask the browser not to evict our data under disk pressure (best-effort)
+  await loadAllAdMediaIntoCache();
+  await migrateAds();
+  await loadAllMediaIntoCache();
+  await migrateMedia();
   applyStateToUI();
+  save(); // persist right away in case migration just moved legacy data out of localStorage
+  updateStorageInfo();
 }
-function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function save(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(err){
+    console.error('Save failed:', err);
+    alert('Gagal menyimpan skor: penyimpanan browser penuh. Ini seharusnya sangat jarang terjadi sekarang karena logo/gambar latar disimpan terpisah dari data skor — coba hapus beberapa Slot Simpan lama (💾 Simpan/Muat) lalu coba lagi.');
+  }
+}
 
 /* ==================== SAVE / LOAD GAME SLOTS ==================== */
 const SAVE_SLOTS = 5;
@@ -538,24 +884,31 @@ function renderSaveSlots(){
     });
   });
   list.querySelectorAll('.slot-load').forEach(b=>{
-    b.addEventListener('click', ()=>{
+    b.addEventListener('click', async ()=>{
       const i = b.dataset.idx;
       const data = getSlotData(i);
       if(!data) return;
       if(!confirm('Muat Slot '+i+'? Perubahan yang belum disimpan pada papan skor saat ini akan hilang.')) return;
       state = Object.assign({}, state, data.state);
       state.shortcuts = Object.assign({}, DEFAULT_SHORTCUTS, data.state.shortcuts || {});
-      migrateAds();
+      await migrateAds();
+      await migrateMedia(); // in case this slot predates id-based media storage
       save();
       applyStateToUI();
+      renderAds();
       closeSaveLoadModal();
     });
   });
   list.querySelectorAll('.slot-del').forEach(b=>{
-    b.addEventListener('click', ()=>{
+    b.addEventListener('click', async ()=>{
       const i = b.dataset.idx;
       if(!confirm('Hapus Slot '+i+'?')) return;
+      const data = getSlotData(i);
       localStorage.removeItem(slotKey(i));
+      if(data && data.state){
+        const ids = [data.state.crestA, data.state.crestB, data.state.bgImage, ...(data.state.sponsors||[])];
+        for(const id of ids) await cleanupMediaIfUnused(id);
+      }
       renderSaveSlots();
     });
   });
@@ -597,8 +950,8 @@ function render(){
   el.setsA.childNodes[0].nodeValue = state.setsA;
   el.setsB.childNodes[0].nodeValue = state.setsB;
 
-  el.crestA.innerHTML = state.crestA ? '<img src="'+state.crestA+'">' : '🛡️';
-  el.crestB.innerHTML = state.crestB ? '<img src="'+state.crestB+'">' : '🏐';
+  el.crestA.innerHTML = state.crestA ? '<img src="'+getMediaUrl(state.crestA)+'">' : '🛡️';
+  el.crestB.innerHTML = state.crestB ? '<img src="'+getMediaUrl(state.crestB)+'">' : '🏐';
 
   renderSponsors();
   renderAds();
@@ -628,15 +981,18 @@ function render(){
 function renderSponsors(){
   el.sponsors.classList.toggle('clean', !editMode);
   el.sponsors.innerHTML = '';
-  state.sponsors.forEach((src, i)=>{
+  state.sponsors.forEach((id, i)=>{
     const wrap = document.createElement('div');
     wrap.className = 'sponsor-logo';
-    wrap.innerHTML = '<img src="'+src+'">' + (editMode ? '<div class="sponsor-remove" data-idx="'+i+'">×</div>' : '');
+    wrap.innerHTML = '<img src="'+getMediaUrl(id)+'">' + (editMode ? '<div class="sponsor-remove" data-idx="'+i+'">×</div>' : '');
     wrap.addEventListener('click', (e)=>{
       if(e.target.classList.contains('sponsor-remove')){
         e.stopPropagation();
-        state.sponsors.splice(Number(e.target.dataset.idx),1);
+        const idx = Number(e.target.dataset.idx);
+        const removedId = state.sponsors[idx];
+        state.sponsors.splice(idx,1);
         render(); save();
+        cleanupMediaIfUnused(removedId);
         return;
       }
       if(editMode){ uploadTarget = 'sponsor:'+i; el.fileInput.click(); }
@@ -720,11 +1076,44 @@ function endCurrentSet(){
   const emptyIdx = state.sets.findIndex(s=>!s);
   const idx = emptyIdx === -1 ? NUM_SETS-1 : emptyIdx;
   state.sets[idx] = state.scoreA + '-' + state.scoreB;
-  if(state.scoreA > state.scoreB) state.setsA++; else if(state.scoreB > state.scoreA) state.setsB++;
+  const winner = state.scoreA > state.scoreB ? 'A' : (state.scoreB > state.scoreA ? 'B' : null);
+  if(winner === 'A') state.setsA++; else if(winner === 'B') state.setsB++;
   state.scoreA = 0; state.scoreB = 0;
   state.vcA=0; state.vcB=0; state.toA=0; state.toB=0; state.subA=0; state.subB=0;
   state.lastScorer = null;
   render(); save();
+  playSetEndAnimation(winner);
+}
+
+/* ---- side-switch / set-end animations ---- */
+function playSideSwitchAnimation(){
+  const overlay = document.getElementById('switchOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('active');
+  void overlay.offsetWidth; // restart animation if played again quickly
+  overlay.classList.add('active');
+  const badge = overlay.querySelector('.switch-badge');
+  const onEnd = ()=>{ overlay.classList.remove('active'); };
+  badge.addEventListener('animationend', onEnd, { once:true });
+}
+function playSetEndAnimation(winner){
+  const overlay = document.getElementById('setEndOverlay');
+  if(!overlay) return;
+  const crestAWrap = document.getElementById('setEndCrestA');
+  const crestBWrap = document.getElementById('setEndCrestB');
+  const label = document.getElementById('setEndLabel');
+  crestAWrap.innerHTML = state.crestA ? '<img src="'+getMediaUrl(state.crestA)+'">' : '🛡️';
+  crestBWrap.innerHTML = state.crestB ? '<img src="'+getMediaUrl(state.crestB)+'">' : '🏐';
+  crestAWrap.classList.toggle('winner', winner === 'A');
+  crestBWrap.classList.toggle('winner', winner === 'B');
+  label.textContent = 'SET SELESAI';
+  overlay.classList.remove('active');
+  void overlay.offsetWidth; // restart animation if triggered again quickly
+  overlay.classList.add('active');
+  let pending = 2;
+  const done = ()=>{ pending--; if(pending<=0) overlay.classList.remove('active'); };
+  crestAWrap.addEventListener('animationend', done, { once:true });
+  crestBWrap.addEventListener('animationend', done, { once:true });
 }
 
 /* ---- generic press-and-hold(=decrement) / tap(=increment) binder ----
@@ -733,12 +1122,14 @@ function endCurrentSet(){
 function bindCounter(node, getVal, setVal, opts){
   opts = opts || {};
   let timer=null, held=false;
-  const start = ()=>{
+  const start = (e)=>{
+    if(e && typeof e.button === 'number' && e.button !== 0) return; // ignore right/middle click
     held=false;
     if(!editMode) return;
     timer = setTimeout(()=>{ held=true; setVal(Math.max(0, getVal()-1)); if(opts.afterDec) opts.afterDec(); render(); save(); }, 550);
   };
-  const end = ()=>{
+  const end = (e)=>{
+    if(e && typeof e.button === 'number' && e.button !== 0) return; // ignore right/middle click
     clearTimeout(timer);
     if(!held){ setVal(getVal()+1); if(opts.afterInc) opts.afterInc(); render(); save(); }
   };
@@ -795,26 +1186,35 @@ let uploadTarget = null;
 el.crestA.addEventListener('click', ()=>{ uploadTarget='crestA'; el.fileInput.click(); });
 el.crestB.addEventListener('click', ()=>{ uploadTarget='crestB'; el.fileInput.click(); });
 
-el.fileInput.addEventListener('change', (e)=>{
+el.fileInput.addEventListener('change', async (e)=>{
   const file = e.target.files[0];
-  if(!file || !uploadTarget) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    if(uploadTarget === 'bgImage'){
-      state.bgImage = reader.result;
-      applyBackground(); save();
-    } else if(uploadTarget.startsWith('sponsor:')){
-      const part = uploadTarget.split(':')[1];
-      if(part === 'new'){ state.sponsors.push(reader.result); }
-      else { state.sponsors[Number(part)] = reader.result; }
-      render(); save();
-    } else {
-      state[uploadTarget] = reader.result;
-      render(); save();
-    }
-  };
-  reader.readAsDataURL(file);
+  const target = uploadTarget;
+  uploadTarget = null;
   e.target.value = '';
+  if(!file || !target) return;
+  // Files are stored as Blobs directly in IndexedDB (no base64 round-trip,
+  // no localStorage quota involvement) — see the TEAM/BG MEDIA STORAGE block.
+  const prefix = target === 'bgImage' ? 'bg' : target.startsWith('sponsor:') ? 'sponsor' : 'crest';
+  const id = genMediaId(prefix);
+  await putMedia(id, file);
+  if(target === 'bgImage'){
+    const oldId = state.bgImage;
+    state.bgImage = id;
+    applyBackground(); save();
+    cleanupMediaIfUnused(oldId);
+  } else if(target.startsWith('sponsor:')){
+    const part = target.split(':')[1];
+    let oldId = null;
+    if(part === 'new'){ state.sponsors.push(id); }
+    else { oldId = state.sponsors[Number(part)]; state.sponsors[Number(part)] = id; }
+    render(); save();
+    cleanupMediaIfUnused(oldId);
+  } else {
+    const oldId = state[target];
+    state[target] = id;
+    render(); save();
+    cleanupMediaIfUnused(oldId);
+  }
 });
 
 /* ---- background ----
@@ -827,8 +1227,9 @@ el.fileInput.addEventListener('change', (e)=>{
    visually hides the solid color underneath it. */
 function applyBackground(){
   el.stage.style.backgroundColor = state.bgColor || '';
-  if(state.bgImage){
-    el.stage.style.backgroundImage = 'url(' + state.bgImage + ')';
+  const bgUrl = getMediaUrl(state.bgImage);
+  if(bgUrl){
+    el.stage.style.backgroundImage = 'url(' + bgUrl + ')';
     el.stage.style.backgroundSize = 'cover';
     el.stage.style.backgroundPosition = 'center';
   } else if(state.bgColor){
@@ -843,7 +1244,9 @@ document.getElementById('bgColorInput').addEventListener('input', (e)=>{
 });
 document.getElementById('bgImageBtn').addEventListener('click', ()=>{ uploadTarget='bgImage'; el.fileInput.click(); });
 document.getElementById('bgResetBtn').addEventListener('click', ()=>{
+  const oldId = state.bgImage;
   state.bgColor = null; state.bgImage = null; applyBackground(); save();
+  cleanupMediaIfUnused(oldId);
 });
 
 /* ---- score size setting ---- */
@@ -967,6 +1370,7 @@ function setEditMode(on){
   el.controls.classList.toggle('open', on);
   document.body.classList.toggle('edit-mode', on);
   renderSponsors();
+  if(on) updateStorageInfo();
 }
 el.ctrlTab.addEventListener('click', ()=> setEditMode(!editMode));
 document.getElementById('controlsClose').addEventListener('click', ()=> setEditMode(false));
@@ -1050,6 +1454,7 @@ document.getElementById('swapBtn').addEventListener('click', ()=>{
   if(state.lastScorer === 'A') state.lastScorer = 'B';
   else if(state.lastScorer === 'B') state.lastScorer = 'A';
   render(); save();
+  playSideSwitchAnimation();
 });
 document.getElementById('resetSetBtn').addEventListener('click', ()=>{
   state.scoreA=0; state.scoreB=0;
@@ -1057,9 +1462,14 @@ document.getElementById('resetSetBtn').addEventListener('click', ()=>{
   state.lastScorer = null;
   render(); save();
 });
-document.getElementById('resetAllBtn').addEventListener('click', ()=>{
+document.getElementById('resetAllBtn').addEventListener('click', async ()=>{
   if(!confirm('Reset seluruh papan skor?')) return;
+  const ids = [state.crestA, state.crestB, state.bgImage, ...(state.sponsors||[])];
   localStorage.removeItem(STORAGE_KEY);
+  for(const id of ids){
+    if(!id || (typeof id === 'string' && id.startsWith('data:'))) continue;
+    if(!isMediaIdUsedInSlots(id)) await deleteMedia(id); // keep it if a save slot still needs it
+  }
   location.reload();
 });
 document.getElementById('fsBtn').addEventListener('click', ()=>{
@@ -1067,17 +1477,16 @@ document.getElementById('fsBtn').addEventListener('click', ()=>{
   else document.exitFullscreen();
 });
 
-/* ==================== ADS: video / audio upload + fullscreen player ==================== */
+/* ==================== ADS: video upload + optional addon music ==================== */
 const adOverlay = document.getElementById('adOverlay');
 const adVideoEl = document.getElementById('adVideoEl');
-const adAudioName = document.getElementById('adAudioName');
 const adAudioEl = new Audio();
-adAudioEl.loop = true; // loops the current ad until the screen is clicked
+adAudioEl.loop = true; // loops the addon music until the screen is clicked
 
-let adAudioPositions = {};   // adId -> last playback position in seconds (resume support)
+let adAudioPositions = {};   // adId -> last addon-music position in seconds (resume support)
 let activeAd = null;
 let fadeTimer = null;
-const FADE_MS = 1200;
+const FADE_MS = 2600;
 const FADE_STEP = 50;
 
 function clearFade(){ if(fadeTimer){ clearInterval(fadeTimer); fadeTimer=null; } }
@@ -1098,13 +1507,11 @@ function fadeVolume(mediaEl, from, to, done){
   }, FADE_STEP);
 }
 
-/* An ad is one item that may hold a video (ad.videoSrc), a separate audio
-   track (ad.audioSrc), or both:
-   - video + separate audio  -> video plays silently, the separate audio is
-     what's heard (both fade together).
-   - video only              -> the video's own audio is unmuted and used.
-   - audio only (no video)   -> behaves like the old standalone audio ad,
-     with the on-screen audio visual and "next track" queue. */
+/* Every ad is a video. It can optionally carry a separate "addon music"
+   track (ad.hasAudio): when present, the video plays silently and the
+   addon music is what's heard, fading in on play, fading out on stop, and
+   resuming from wherever it was left off last time this ad played. With no
+   addon music, the video's own soundtrack is unmuted and faded instead. */
 let adAudioAttachIdx = null;
 
 function renderAds(){
@@ -1113,96 +1520,71 @@ function renderAds(){
   list.innerHTML = '';
   if(!state.ads.length){
     list.innerHTML = '<div class="ad-empty-note">Belum ada iklan diunggah.</div>';
-    return;
+  } else {
+    state.ads.forEach((ad, i)=>{
+      const hasAudio = !!ad.hasAudio;
+      const audioTag = hasAudio ? '<span class="ad-audio-tag" title="Musik tambahan terpasang">🎵</span>' : '';
+      const row = document.createElement('div');
+      row.className = 'ad-row';
+      row.innerHTML =
+        '<span class="ad-icon">🎬</span>'+
+        '<span class="ad-name" title="'+ad.name.replace(/"/g,'&quot;')+'">'+ad.name+'</span>'+
+        audioTag+
+        '<button class="ad-attach-audio" data-idx="'+i+'" title="'+(hasAudio?'Ganti musik tambahan':'Tambah musik tambahan')+'">'+(hasAudio?'🎵↺':'🎵+')+'</button>'+
+        (hasAudio ? '<button class="ad-remove-audio" data-idx="'+i+'" title="Hapus musik tambahan, pakai suara video">🎵×</button>' : '')+
+        '<button class="ad-play" data-idx="'+i+'">▶</button>'+
+        '<button class="ad-del" data-idx="'+i+'">🗑</button>';
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.ad-play').forEach(b=>{
+      b.addEventListener('click', ()=> playAd(state.ads[Number(b.dataset.idx)]));
+    });
+    list.querySelectorAll('.ad-del').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const idx = Number(b.dataset.idx);
+        const ad = state.ads[idx];
+        if(activeAd && ad && activeAd.id === ad.id) stopAd(true);
+        if(ad){ delete adAudioPositions[ad.id]; deleteAdMedia(ad.id).then(updateStorageInfo); }
+        state.ads.splice(idx,1);
+        render(); save();
+      });
+    });
+    list.querySelectorAll('.ad-attach-audio').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        adAudioAttachIdx = Number(b.dataset.idx);
+        document.getElementById('adAttachAudioInput').click();
+      });
+    });
+    list.querySelectorAll('.ad-remove-audio').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const idx = Number(b.dataset.idx);
+        const ad = state.ads[idx];
+        if(!ad) return;
+        if(activeAd && activeAd.id === ad.id) stopAd(true);
+        ad.hasAudio = false;
+        delete adAudioPositions[ad.id];
+        putAdMedia(ad.id, { audioBlob: null }).then(updateStorageInfo);
+        render(); save();
+      });
+    });
   }
-  state.ads.forEach((ad, i)=>{
-    const hasVideo = !!ad.videoSrc;
-    const hasAudio = !!ad.audioSrc;
-    const icon = hasVideo ? '🎬' : '🎵';
-    const audioTag = hasVideo ? (hasAudio ? '<span class="ad-audio-tag" title="Audio terpisah terpasang">🎵</span>' : '') : '';
-    const row = document.createElement('div');
-    row.className = 'ad-row';
-    row.innerHTML =
-      '<span class="ad-icon">'+icon+'</span>'+
-      '<span class="ad-name" title="'+ad.name.replace(/"/g,'&quot;')+'">'+ad.name+'</span>'+
-      audioTag+
-      (hasVideo ? '<button class="ad-attach-audio" data-idx="'+i+'" title="'+(hasAudio?'Ganti audio terpisah':'Tambah audio terpisah')+'">'+(hasAudio?'🎵↺':'🎵+')+'</button>' : '')+
-      (hasVideo && hasAudio ? '<button class="ad-remove-audio" data-idx="'+i+'" title="Hapus audio terpisah, pakai suara video">🎵×</button>' : '')+
-      '<button class="ad-play" data-idx="'+i+'">▶</button>'+
-      '<button class="ad-del" data-idx="'+i+'">🗑</button>';
-    list.appendChild(row);
-  });
-  list.querySelectorAll('.ad-play').forEach(b=>{
-    b.addEventListener('click', ()=> playAd(state.ads[Number(b.dataset.idx)]));
-  });
-  list.querySelectorAll('.ad-del').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const idx = Number(b.dataset.idx);
-      const ad = state.ads[idx];
-      if(activeAd && ad && activeAd.id === ad.id) stopAd(true);
-      if(ad) delete adAudioPositions[ad.id];
-      state.ads.splice(idx,1);
-      render(); save();
-    });
-  });
-  list.querySelectorAll('.ad-attach-audio').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      adAudioAttachIdx = Number(b.dataset.idx);
-      document.getElementById('adAttachAudioInput').click();
-    });
-  });
-  list.querySelectorAll('.ad-remove-audio').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const idx = Number(b.dataset.idx);
-      const ad = state.ads[idx];
-      if(!ad) return;
-      if(activeAd && activeAd.id === ad.id) stopAd(true);
-      ad.audioSrc = null;
-      render(); save();
-    });
-  });
+  updateStorageInfo();
 }
 
 document.getElementById('adAddVideoBtnPanel').addEventListener('click', ()=>{
   document.getElementById('adVideoFileInput').click();
 });
-document.getElementById('adAddAudioBtnPanel').addEventListener('click', ()=>{
-  document.getElementById('adAudioFileInput').click();
-});
 document.getElementById('adVideoFileInput').addEventListener('change', (e)=>{
   const files = Array.from(e.target.files || []);
   if(!files.length) return;
-  let remaining = files.length;
-  files.forEach(file=>{
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      state.ads.push({
-        id: 'ad_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-        name: file.name, videoSrc: reader.result, audioSrc: null
-      });
-      remaining--;
-      if(remaining === 0){ renderAds(); save(); }
-    };
-    reader.readAsDataURL(file);
-  });
-  e.target.value = '';
-});
-document.getElementById('adAudioFileInput').addEventListener('change', (e)=>{
-  const files = Array.from(e.target.files || []);
-  if(!files.length) return;
-  let remaining = files.length;
-  files.forEach(file=>{
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      state.ads.push({
-        id: 'ad_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-        name: file.name, videoSrc: null, audioSrc: reader.result
-      });
-      remaining--;
-      if(remaining === 0){ renderAds(); save(); }
-    };
-    reader.readAsDataURL(file);
-  });
+  (async ()=>{
+    for(const file of files){
+      const id = 'ad_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      await putAdMedia(id, { videoBlob: file, audioBlob: null }); // File is a Blob — stored as-is, no base64 overhead
+      state.ads.push({ id, name: file.name, hasVideo:true, hasAudio:false });
+    }
+    renderAds(); save();
+  })();
   e.target.value = '';
 });
 document.getElementById('adAttachAudioInput').addEventListener('change', (e)=>{
@@ -1210,116 +1592,84 @@ document.getElementById('adAttachAudioInput').addEventListener('change', (e)=>{
   const idx = adAudioAttachIdx;
   adAudioAttachIdx = null;
   if(!file || idx === null || !state.ads[idx]){ e.target.value=''; return; }
-  const reader = new FileReader();
-  reader.onload = ()=>{
+  (async ()=>{
     const ad = state.ads[idx];
-    ad.audioSrc = reader.result;
+    await putAdMedia(ad.id, { audioBlob: file }); // videoBlob untouched — putAdMedia merges by key
+    ad.hasAudio = true;
+    delete adAudioPositions[ad.id]; // fresh track attached, start it from the beginning next play
     if(activeAd && activeAd.id === ad.id) stopAd(true);
     renderAds(); save();
-  };
-  reader.readAsDataURL(file);
+  })();
   e.target.value = '';
 });
 
 function playAd(ad){
   if(!ad) return;
+  clearFade();
+  const { videoSrc, audioSrc } = getAdSrcs(ad.id);
   activeAd = ad;
-  const hasVideo = !!ad.videoSrc;
-  const hasAudio = !!ad.audioSrc;
-  adOverlay.classList.remove('mode-video','mode-audio');
-  adOverlay.classList.add(hasVideo ? 'mode-video' : 'mode-audio');
   adOverlay.classList.add('open');
 
-  if(hasVideo){
-    if(hasAudio){
-      /* Separate audio track drives the sound; the video plays silently. */
-      adVideoEl.src = ad.videoSrc;
-      adVideoEl.loop = true;
-      adVideoEl.muted = true;
-      adVideoEl.volume = 0;
-      adVideoEl.currentTime = 0;
-      const vp = adVideoEl.play();
-      if(vp && vp.catch) vp.catch(()=>{});
+  adVideoEl.pause();
+  adVideoEl.src = videoSrc || '';
+  adVideoEl.loop = true;
+  adVideoEl.currentTime = 0;
 
-      adAudioEl.pause();
-      adAudioEl.src = ad.audioSrc;
-      adAudioEl.dataset.adId = ad.id;
-      adAudioEl.loop = true;
-      adAudioEl.currentTime = 0;
-      adAudioEl.volume = 0;
-      const ap = adAudioEl.play();
-      if(ap && ap.catch) ap.catch(()=>{});
-      fadeVolume(adAudioEl, 0, 1);
-    } else {
-      /* No separate audio: use the video's own soundtrack. */
-      adAudioEl.pause();
-      adVideoEl.src = ad.videoSrc;
-      adVideoEl.loop = true;
-      adVideoEl.muted = false;
-      adVideoEl.volume = 0;
-      adVideoEl.currentTime = 0;
-      const vp = adVideoEl.play();
-      if(vp && vp.catch) vp.catch(()=>{});
-      fadeVolume(adVideoEl, 0, 1);
-    }
-  } else {
-    /* Audio-only ad: no video, show the audio visual. */
-    adVideoEl.pause();
-    adVideoEl.removeAttribute('src');
-    adVideoEl.load();
-    adAudioName.textContent = ad.name;
-    if(adAudioEl.dataset.adId !== ad.id){
-      adAudioEl.src = ad.audioSrc;
-      adAudioEl.dataset.adId = ad.id;
-      adAudioEl.currentTime = adAudioPositions[ad.id] || 0;
-    }
+  if(audioSrc){
+    /* Addon music drives the sound; the video plays silently alongside it,
+       and the music resumes from wherever it was left off for this ad. */
+    adVideoEl.muted = true;
+    adVideoEl.volume = 0;
+    const vp = adVideoEl.play();
+    if(vp && vp.catch) vp.catch(()=>{});
+
+    adAudioEl.pause();
+    adAudioEl.src = audioSrc;
+    adAudioEl.dataset.adId = ad.id;
     adAudioEl.loop = true;
+    adAudioEl.currentTime = adAudioPositions[ad.id] || 0;
     adAudioEl.volume = 0;
     const ap = adAudioEl.play();
     if(ap && ap.catch) ap.catch(()=>{});
     fadeVolume(adAudioEl, 0, 1);
+  } else {
+    /* No addon music: use the video's own soundtrack. */
+    adAudioEl.pause();
+    adVideoEl.muted = false;
+    adVideoEl.volume = 0;
+    const vp = adVideoEl.play();
+    if(vp && vp.catch) vp.catch(()=>{});
+    fadeVolume(adVideoEl, 0, 1);
   }
 }
 
 function stopAd(instant){
   if(!activeAd) return;
   const ad = activeAd;
-  const hasVideo = !!ad.videoSrc;
-  const hasAudio = !!ad.audioSrc;
-  const finish = ()=>{
-    adOverlay.classList.remove('open');
-    if(hasVideo){
-      adVideoEl.pause();
-      adVideoEl.removeAttribute('src');
-      adVideoEl.load();
-    }
-    if(hasAudio){
-      adAudioEl.pause();
-      if(!hasVideo) adAudioPositions[ad.id] = adAudioEl.currentTime; // resume position only matters for audio-only ads
-    }
-    activeAd = null;
+  const hasAudio = !!ad.hasAudio;
+  const soundEl = hasAudio ? adAudioEl : adVideoEl;
+
+  /* The screen closes immediately when clicked — it should never sit
+     waiting on the sound to fade out before disappearing. Whichever
+     element actually carries the sound keeps fading out quietly in the
+     background, then gets paused/cleaned up once silent. The addon
+     music's position is remembered so it resumes from there next time. */
+  adOverlay.classList.remove('open');
+  activeAd = null;
+
+  const cleanup = ()=>{
+    if(hasAudio) adAudioPositions[ad.id] = adAudioEl.currentTime;
+    adAudioEl.pause();
+    adVideoEl.pause();
+    adVideoEl.removeAttribute('src');
+    adVideoEl.load();
   };
-  if(instant){ finish(); return; }
-  /* Fade whichever element is actually producing the sound. */
-  if(hasVideo && !hasAudio) fadeVolume(adVideoEl, adVideoEl.volume, 0, finish);
-  else if(hasAudio) fadeVolume(adAudioEl, adAudioEl.volume, 0, finish);
-  else finish();
+
+  if(instant){ cleanup(); return; }
+  fadeVolume(soundEl, soundEl.volume, 0, cleanup);
 }
 
-function nextAudioAd(){
-  if(!activeAd || activeAd.videoSrc) return; // queue only applies to audio-only ads
-  const audioAds = state.ads.filter(a=>!a.videoSrc && a.audioSrc);
-  if(audioAds.length < 2) return;
-  const curIdx = audioAds.findIndex(a=>a.id === activeAd.id);
-  adAudioPositions[activeAd.id] = adAudioEl.currentTime;
-  const next = audioAds[(curIdx+1) % audioAds.length];
-  playAd(next);
-}
-document.getElementById('adNextBtn').addEventListener('click', (e)=>{ e.stopPropagation(); nextAudioAd(); });
-adOverlay.addEventListener('click', (e)=>{
-  if(e.target.closest('#adNextBtn')) return;
-  stopAd();
-});
+adOverlay.addEventListener('click', ()=> stopAd());
 
 /* ==================== SHORTCUT CUSTOMIZATION ==================== */
 const shortcutBackdrop = document.getElementById('shortcutBackdrop');
